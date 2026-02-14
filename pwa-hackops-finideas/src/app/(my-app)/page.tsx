@@ -1,18 +1,22 @@
-import Navbar from '@/components/navbar'
+"use client";
 
-export default function Home() {
+import UploadCard from "@/components/UploadCard";
+import LeadList from "@/components/LeadList";
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">Welcome to HackOps</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Your hackathon management platform built with Next.js, Payload CMS,
-            and TanStack Query.
-          </p>
-        </div>
-      </main>
+    <div className="min-h-screen p-8 bg-gray-50">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-2 text-gray-800">
+          Business Card Scanner
+        </h1>
+        <p className="text-gray-600 mb-6">
+          Upload business cards and extract text using OCR technology
+        </p>
+
+        <UploadCard />
+        <LeadList />
+      </div>
     </div>
-  )
+  );
 }

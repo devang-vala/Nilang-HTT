@@ -12,7 +12,6 @@
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "supportedTimezones".
  */
-
 export type SupportedTimezones =
   | 'Pacific/Midway'
   | 'Pacific/Niue'
@@ -70,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    leads: Lead;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -79,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -163,6 +164,43 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: string;
+  /**
+   * Full name of the lead
+   */
+  name: string;
+  /**
+   * Company name of the lead
+   */
+  companyName?: string | null;
+  /**
+   * Contact number with country code
+   */
+  contactNo: string;
+  /**
+   * Email address of the lead
+   */
+  email: string;
+  /**
+   * Photo of the lead or business card
+   */
+  photo?: (string | null) | Media;
+  /**
+   * Voice note recording
+   */
+  voiceNote?: (string | null) | Media;
+  /**
+   * Lead priority tag
+   */
+  tags: 'hot' | 'warm' | 'cold';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -192,6 +230,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: string | Lead;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -276,6 +318,21 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  name?: T;
+  companyName?: T;
+  contactNo?: T;
+  email?: T;
+  photo?: T;
+  voiceNote?: T;
+  tags?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
