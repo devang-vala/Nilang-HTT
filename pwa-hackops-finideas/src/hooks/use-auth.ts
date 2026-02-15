@@ -12,7 +12,7 @@ interface PayloadUser {
   id: string
   email: string
   name: string
-  role: string
+  role: 'admin' | 'user'
   createdAt: string
 }
 
@@ -149,4 +149,16 @@ export function useLogout() {
       queryClient.clear()
     })
   }
+}
+
+// Check if current user is admin
+export function useIsAdmin(): boolean {
+  const { data: user } = useCurrentUser()
+  return user?.role === 'admin'
+}
+
+// Check if current user has a specific role
+export function useHasRole(role: 'admin' | 'user'): boolean {
+  const { data: user } = useCurrentUser()
+  return user?.role === role
 }

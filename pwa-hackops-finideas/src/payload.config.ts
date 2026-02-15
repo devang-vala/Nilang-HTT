@@ -6,9 +6,14 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
+// Existing collections
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
+
+// New collections for email & meeting automation
+import { EmailTemplates } from './collections/EmailTemplates'
+import { ScheduledEmails } from './collections/ScheduledEmails'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,7 +25,13 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Leads],
+  collections: [
+    Users,
+    Media,
+    Leads,
+    EmailTemplates,
+    ScheduledEmails,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

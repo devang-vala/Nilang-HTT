@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from "../../../../../payload.config"
 import { z } from 'zod'
+import { requireAuth } from '@/lib/auth'
 
 const leadSchema = z.object({
     name: z.string().min(2).max(100).trim(),
@@ -15,6 +16,12 @@ const leadSchema = z.object({
     voiceNote: z.string().optional().nullable(),
     tags: z.enum(['hot', 'warm', 'cold']),
     localId: z.string().optional(), // For mobile sync tracking
+    latitude: z.number().optional().nullable(),
+    longitude: z.number().optional().nullable(),
+    locationName: z.string().optional().nullable(),
+    city: z.string().optional().nullable(),
+    state: z.string().optional().nullable(),
+    country: z.string().optional().nullable(),
 })
 
 const bulkSchema = z.object({
@@ -24,6 +31,16 @@ const bulkSchema = z.object({
 // POST - Bulk create leads
 export async function POST(request: NextRequest) {
     try {
+        // Require authentication
+        const authResult = await requireAuth()
+        if (!authResult.authenticated) {
+            return NextResponse.json(
+                { success: false, message: authResult.error },
+                { status: authResult.status }
+            )
+        }
+
+        const { user: currentUser } = authResult
         const payload = await getPayload({ config })
         const body = await request.json()
 
@@ -55,7 +72,9 @@ export async function POST(request: NextRequest) {
                 const { localId, ...data } = leadData
                 const lead = await payload.create({
                     collection: 'leads',
-                    data,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    data: { ...data, createdBy: currentUser.id } as any,
+                    overrideAccess: true,
                 })
                 const transformedLead = {
                     ...lead,

@@ -70,6 +70,8 @@ export interface Config {
     users: User;
     media: Media;
     leads: Lead;
+    'email-templates': EmailTemplate;
+    'scheduled-emails': ScheduledEmail;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +82,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
+    'email-templates': EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
+    'scheduled-emails': ScheduledEmailsSelect<false> | ScheduledEmailsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -196,6 +200,128 @@ export interface Lead {
    * Lead priority tag
    */
   tags: 'hot' | 'warm' | 'cold';
+  /**
+   * Raw text from visiting card OCR (optional)
+   */
+  ocrRawText?: string | null;
+  /**
+   * AI-generated summary of the voice note
+   */
+  voiceNoteSummary?: string | null;
+  /**
+   * Speech-to-text from field voice note (stored in DB only)
+   */
+  voiceNoteTranscript?: string | null;
+  /**
+   * Current follow-up status of the lead
+   */
+  followUpStatus?: ('pending' | 'email_sent' | 'meeting_scheduled' | 'converted' | 'lost') | null;
+  /**
+   * Curated follow-up tags for Finideas workflow (1–2 per lead)
+   */
+  followUpTags?:
+    | (
+        | 'product_inquiry'
+        | 'demo_request'
+        | 'partnership'
+        | 'investment_interest'
+        | 'follow_up_call'
+        | 'newsletter'
+        | 'event_interest'
+        | 'support'
+      )[]
+    | null;
+  /**
+   * Next scheduled follow-up date
+   */
+  nextFollowUpDate?: string | null;
+  /**
+   * History of emails sent to this lead
+   */
+  emailsSent?:
+    | {
+        subject?: string | null;
+        template?: string | null;
+        sentAt?: string | null;
+        status?: ('sent' | 'failed') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Scheduled Jitsi/Google Meet meetings
+   */
+  meetings?:
+    | {
+        meetLink?: string | null;
+        scheduledAt?: string | null;
+        status?: ('scheduled' | 'completed' | 'cancelled') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Latitude from device geolocation
+   */
+  latitude?: number | null;
+  /**
+   * Longitude from device geolocation
+   */
+  longitude?: number | null;
+  /**
+   * Full address resolved via reverse geocoding
+   */
+  locationName?: string | null;
+  /**
+   * City from reverse geocoding
+   */
+  city?: string | null;
+  /**
+   * State from reverse geocoding
+   */
+  state?: string | null;
+  /**
+   * Country from reverse geocoding
+   */
+  country?: string | null;
+  /**
+   * User who created this lead
+   */
+  createdBy?: (string | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates".
+ */
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  priority: 'hot' | 'warm' | 'cold';
+  type: 'initial' | 'followup' | 'meeting' | 'thankyou';
+  /**
+   * Use {{name}}, {{companyName}} for dynamic values
+   */
+  subject: string;
+  /**
+   * Use {{name}}, {{companyName}}, {{meetLink}}, {{date}} for dynamic values
+   */
+  body: string;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scheduled-emails".
+ */
+export interface ScheduledEmail {
+  id: string;
+  lead: string | Lead;
+  template: string | EmailTemplate;
+  scheduledAt: string;
+  status?: ('pending' | 'sent' | 'failed' | 'cancelled') | null;
+  sentAt?: string | null;
+  error?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -234,6 +360,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leads';
         value: string | Lead;
+      } | null)
+    | ({
+        relationTo: 'email-templates';
+        value: string | EmailTemplate;
+      } | null)
+    | ({
+        relationTo: 'scheduled-emails';
+        value: string | ScheduledEmail;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -331,6 +465,64 @@ export interface LeadsSelect<T extends boolean = true> {
   photo?: T;
   voiceNote?: T;
   tags?: T;
+  ocrRawText?: T;
+  voiceNoteSummary?: T;
+  voiceNoteTranscript?: T;
+  followUpStatus?: T;
+  followUpTags?: T;
+  nextFollowUpDate?: T;
+  emailsSent?:
+    | T
+    | {
+        subject?: T;
+        template?: T;
+        sentAt?: T;
+        status?: T;
+        id?: T;
+      };
+  meetings?:
+    | T
+    | {
+        meetLink?: T;
+        scheduledAt?: T;
+        status?: T;
+        id?: T;
+      };
+  latitude?: T;
+  longitude?: T;
+  locationName?: T;
+  city?: T;
+  state?: T;
+  country?: T;
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates_select".
+ */
+export interface EmailTemplatesSelect<T extends boolean = true> {
+  name?: T;
+  priority?: T;
+  type?: T;
+  subject?: T;
+  body?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scheduled-emails_select".
+ */
+export interface ScheduledEmailsSelect<T extends boolean = true> {
+  lead?: T;
+  template?: T;
+  scheduledAt?: T;
+  status?: T;
+  sentAt?: T;
+  error?: T;
   updatedAt?: T;
   createdAt?: T;
 }

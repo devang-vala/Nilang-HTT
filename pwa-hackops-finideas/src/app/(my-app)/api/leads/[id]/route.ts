@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '../../../../../payload.config'
 import { z } from 'zod'
+import { requireAuth } from '@/lib/auth'
 
 interface Lead {
     id: string
@@ -67,21 +68,39 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authResult = await requireAuth()
+        if (!authResult.authenticated) {
+            return NextResponse.json(
+                { success: false, message: authResult.error },
+                { status: authResult.status }
+            )
+        }
+
+        const { user: currentUser } = authResult
         const payload = await getPayload({ config })
         const { id } = await params
 
         const lead = await payload.findByID({
             collection: 'leads',
             id,
+            overrideAccess: true,
         })
 
         if (!lead) {
             return NextResponse.json(
-                {
-                    success: false,
-                    message: 'Lead not found',
-                },
+                { success: false, message: 'Lead not found' },
                 { status: 404 }
+            )
+        }
+
+        // Check ownership for non-admin users
+        const leadCreatedBy = typeof lead.createdBy === 'object' && lead.createdBy !== null
+            ? (lead.createdBy as { id: string }).id
+            : lead.createdBy
+        if (currentUser.role !== 'admin' && leadCreatedBy !== currentUser.id) {
+            return NextResponse.json(
+                { success: false, message: 'Access denied' },
+                { status: 403 }
             )
         }
 
@@ -109,9 +128,30 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authResult = await requireAuth()
+        if (!authResult.authenticated) {
+            return NextResponse.json(
+                { success: false, message: authResult.error },
+                { status: authResult.status }
+            )
+        }
+
+        const { user: currentUser } = authResult
         const payload = await getPayload({ config })
         const { id } = await params
         const body = await request.json()
+
+        // Check ownership for non-admin users
+        const existingLead = await payload.findByID({ collection: 'leads', id, overrideAccess: true })
+        const leadCreatedBy = typeof existingLead.createdBy === 'object' && existingLead.createdBy !== null
+            ? (existingLead.createdBy as { id: string }).id
+            : existingLead.createdBy
+        if (currentUser.role !== 'admin' && leadCreatedBy !== currentUser.id) {
+            return NextResponse.json(
+                { success: false, message: 'Access denied' },
+                { status: 403 }
+            )
+        }
 
         // Validate input
         const result = leadSchema.safeParse(body)
@@ -155,14 +195,35 @@ export async function PUT(
     }
 }
 
-// DELETE - Delete lead
+// DELETE - Delete lead (admin only)
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authResult = await requireAuth()
+        if (!authResult.authenticated) {
+            return NextResponse.json(
+                { success: false, message: authResult.error },
+                { status: authResult.status }
+            )
+        }
+
+        const { user: currentUser } = authResult
         const payload = await getPayload({ config })
         const { id } = await params
+
+        // Check ownership for non-admin users
+        const existingLead = await payload.findByID({ collection: 'leads', id, overrideAccess: true })
+        const leadCreatedBy = typeof existingLead.createdBy === 'object' && existingLead.createdBy !== null
+            ? (existingLead.createdBy as { id: string }).id
+            : existingLead.createdBy
+        if (currentUser.role !== 'admin' && leadCreatedBy !== currentUser.id) {
+            return NextResponse.json(
+                { success: false, message: 'Access denied' },
+                { status: 403 }
+            )
+        }
 
         const lead = await payload.delete({
             collection: 'leads',

@@ -4,13 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:phone": "next dev --turbopack -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
+    "start:phone": "next start -H 0.0.0.0",
     "lint": "next lint",
-    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types"
+    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
+    "seed:admin": "npx tsx scripts/seed-admin.ts"
   },
   "type": "module",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@payloadcms/db-mongodb": "^3.76.1",
     "@payloadcms/email-nodemailer": "^3.76.1",
     "@payloadcms/next": "^3.76.1",
@@ -25,11 +29,13 @@
     "@tanstack/react-query-devtools": "^5.91.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "googleapis": "^171.4.0",
     "graphql": "^16.12.0",
     "i": "^0.3.7",
     "idb": "^8.0.3",
     "lucide-react": "^0.564.0",
     "next": "15.4.11",
+    "node-cron": "^4.2.1",
     "nodemailer": "^8.0.1",
     "payload": "^3.76.1",
     "radix-ui": "^1.4.3",

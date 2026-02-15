@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useLogin, useRegister, useCurrentUser } from '@/hooks/use-auth'
@@ -18,7 +18,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertCircle, Loader2 } from 'lucide-react'
 
-export default function AuthPage() {
+function AuthPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: user, isLoading: userLoading } = useCurrentUser()
@@ -41,9 +41,10 @@ export default function AuthPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !userLoading) {
-      router.push('/dashboard')
+      const redirect = searchParams.get('redirect') || '/'
+      router.push(redirect)
     }
-  }, [user, userLoading, router])
+  }, [user, userLoading, router, searchParams])
 
   useEffect(() => {
     const errorParam = searchParams.get('error')
@@ -61,7 +62,8 @@ export default function AuthPage() {
         email: loginEmail,
         password: loginPassword,
       })
-      router.push('/dashboard')
+      const redirect = searchParams.get('redirect') || '/'
+      router.push(redirect)
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Login failed'
@@ -95,7 +97,8 @@ export default function AuthPage() {
         email: signupEmail,
         password: signupPassword,
       })
-      router.push('/dashboard')
+      const redirect = searchParams.get('redirect') || '/'
+      router.push(redirect)
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Signup failed'
@@ -240,5 +243,19 @@ export default function AuthPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-purple-50">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
+        </div>
+      }
+    >
+      <AuthPageContent />
+    </Suspense>
   )
 }

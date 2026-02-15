@@ -97,43 +97,52 @@ export async function processPendingOCR(): Promise<void> {
   }
 }
 
-export async function syncLeads() {
+export async function syncLeads(): Promise<{ synced: number; failed: number }> {
   const db = await getDB();
   const allLeads: Lead[] = await db.getAll("leads");
+  let synced = 0;
+  let failed = 0;
 
   for (const lead of allLeads) {
-    if (
-      lead.ocrStatus === "done" &&
-      lead.syncStatus === "pending"
-    ) {
-      try {
-        const response = await fetch(
-          "http://localhost:8000/save-lead",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: lead.id,
-              rawText: lead.rawText,
-            }),
-          }
-        );
+    if (lead.ocrStatus !== "done" || lead.syncStatus !== "pending") continue;
+    try {
+      const response = await fetch("/api/leads/ocr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          rawText: lead.rawText,
+          localId: lead.id,
+        }),
+      });
 
-        if (response.ok) {
-          lead.syncStatus = "synced";
-          await db.put("leads", lead);
-          
-          // Dispatch event after successful sync
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("leadsUpdated"));
-          }
-        }
-      } catch (err) {
-        console.log("Sync failed:", err);
+      if (!response.ok) {
+        failed++;
+        continue;
       }
+
+      const result = await response.json();
+      lead.syncStatus = "synced";
+      lead.payloadId = result.data?.id;
+      await db.put("leads", lead);
+      synced++;
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("leadsUpdated"));
+      }
+    } catch (err) {
+      console.error("OCR lead sync failed:", err);
+      failed++;
     }
+  }
+
+  return { synced, failed };
+}
+
+export async function deleteLead(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete("leads", id);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("leadsUpdated"));
   }
 }
 
