@@ -21,6 +21,7 @@ import {
   Merge,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import InlineQRScanner from "@/components/InlineQRScanner";
 
 export default function StallForm() {
   const [form, setForm] = useState({
@@ -37,6 +38,7 @@ export default function StallForm() {
   const [submittedMerged, setSubmittedMerged] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ocrScanning, setOcrScanning] = useState(false);
+  const [qrData, setQrData] = useState<string | null>(null);
   const scanInputRef = useRef<HTMLInputElement>(null);
   const submitInProgressRef = useRef(false);
 
@@ -101,6 +103,7 @@ export default function StallForm() {
         voiceNote: null,
         latitude,
         longitude,
+        qrData,
       });
 
       if (isOnline()) {
@@ -112,6 +115,7 @@ export default function StallForm() {
       setForm({ name: "", companyName: "", contactNo: "", email: "", tags: "warm" });
       setPhoto(null);
       setPhotoPreview(null);
+      setQrData(null);
 
       setTimeout(() => {
         setSubmitted(false);
@@ -300,6 +304,18 @@ export default function StallForm() {
             />
           </div>
         )}
+      </div>
+
+      {/* QR Code Scanner (optional) */}
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+          Scan QR Code <span className="text-slate-400 normal-case">(optional)</span>
+        </Label>
+        <InlineQRScanner
+          value={qrData}
+          onScan={(data) => setQrData(data)}
+          onClear={() => setQrData(null)}
+        />
       </div>
 
       {/* Error */}

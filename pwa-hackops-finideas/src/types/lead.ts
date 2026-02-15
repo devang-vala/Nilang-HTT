@@ -31,6 +31,8 @@ export interface ContactFormData {
   /** @deprecated use voiceNoteTranscript */
   audioTranscript?: string;
   notes?: string;
+  /** Data captured from QR code scan (URL or plain text) */
+  qrData?: string | null;
   // Location data (captured via Geolocation API on form submit)
   latitude?: number | null;
   longitude?: number | null;

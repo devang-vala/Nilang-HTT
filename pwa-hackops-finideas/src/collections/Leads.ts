@@ -121,6 +121,15 @@ export const Leads: CollectionConfig = {
       },
     },
 
+    // ============ QR CODE DATA ============
+    {
+      name: 'qrData',
+      type: 'text',
+      admin: {
+        description: 'Data captured from QR code scan (URL or text)',
+      },
+    },
+
     // ============ OCR & VOICE PROCESSING ============
     {
       name: 'ocrRawText',

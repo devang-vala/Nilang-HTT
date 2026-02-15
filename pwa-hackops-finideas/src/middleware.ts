@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Routes that require authentication
-const protectedRoutes = ['/', '/dashboard', '/recorder']
+const protectedRoutes = ['/', '/dashboard', '/recorder', '/scan']
 
 // Routes that are only for guests (redirect to home if logged in)
 const guestOnlyRoutes = ['/auth', '/forgot-password', '/reset-password']

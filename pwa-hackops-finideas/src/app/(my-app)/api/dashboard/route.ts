@@ -98,6 +98,7 @@ export async function GET() {
         city: (leadAny.city as string) ?? null,
         state: (leadAny.state as string) ?? null,
         country: (leadAny.country as string) ?? null,
+        qrData: (leadAny.qrData as string) ?? null,
         emailsSentCount: emailsSent.length,
         emailsSent,
         meetingsCount: meetings.length,

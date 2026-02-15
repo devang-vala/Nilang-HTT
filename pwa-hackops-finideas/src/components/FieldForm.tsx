@@ -31,6 +31,7 @@ import {
   Merge,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import InlineQRScanner from "@/components/InlineQRScanner";
 
 export default function FieldForm() {
   const [form, setForm] = useState({
@@ -47,6 +48,7 @@ export default function FieldForm() {
   const [submittedMerged, setSubmittedMerged] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ocrScanning, setOcrScanning] = useState(false);
+  const [qrData, setQrData] = useState<string | null>(null);
   const scanInputRef = useRef<HTMLInputElement>(null);
   const submitInProgressRef = useRef(false);
 
@@ -124,6 +126,7 @@ export default function FieldForm() {
         notes: form.notes,
         latitude,
         longitude,
+        qrData,
       });
 
       if (isOnline()) {
@@ -141,6 +144,7 @@ export default function FieldForm() {
       });
       setPhoto(null);
       setPhotoPreview(null);
+      setQrData(null);
       audio.clearRecording();
 
       setTimeout(() => {
@@ -301,6 +305,18 @@ export default function FieldForm() {
             className="w-full h-28 object-cover rounded-md border border-slate-200 mt-2"
           />
         )}
+      </div>
+
+      {/* QR Code Scanner (optional) */}
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+          Scan QR Code <span className="text-slate-400 normal-case">(optional)</span>
+        </Label>
+        <InlineQRScanner
+          value={qrData}
+          onScan={(data) => setQrData(data)}
+          onClear={() => setQrData(null)}
+        />
       </div>
 
       {/* Voice Note */}

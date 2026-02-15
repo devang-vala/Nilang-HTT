@@ -201,6 +201,10 @@ export interface Lead {
    */
   tags: 'hot' | 'warm' | 'cold';
   /**
+   * Data captured from QR code scan (URL or text)
+   */
+  qrData?: string | null;
+  /**
    * Raw text from visiting card OCR (optional)
    */
   ocrRawText?: string | null;
@@ -465,6 +469,7 @@ export interface LeadsSelect<T extends boolean = true> {
   photo?: T;
   voiceNote?: T;
   tags?: T;
+  qrData?: T;
   ocrRawText?: T;
   voiceNoteSummary?: T;
   voiceNoteTranscript?: T;

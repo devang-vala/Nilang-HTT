@@ -77,6 +77,7 @@ export async function saveContactLocally(
       voiceNote: contact.voiceNote || duplicate.voiceNote,
       voiceNoteTranscript: contact.voiceNoteTranscript || duplicate.voiceNoteTranscript,
       followUpTags: contact.followUpTags?.length ? contact.followUpTags : duplicate.followUpTags,
+      qrData: contact.qrData || duplicate.qrData,
       audioTranscript: contact.audioTranscript || duplicate.audioTranscript,
       latitude: contact.latitude ?? duplicate.latitude,
       longitude: contact.longitude ?? duplicate.longitude,
@@ -284,6 +285,7 @@ export async function syncContactToPayload(
     if (resolvedTranscript) payload.voiceNoteTranscript = resolvedTranscript;
     if (contact.followUpTags?.length)
       payload.followUpTags = contact.followUpTags.slice(0, 2);
+    if (contact.qrData) payload.qrData = contact.qrData;
 
     // Send location coordinates for server-side reverse geocoding
     if (contact.latitude != null) payload.latitude = contact.latitude;
