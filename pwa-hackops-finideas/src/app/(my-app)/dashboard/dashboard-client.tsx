@@ -52,21 +52,18 @@ interface Lead {
   meetings: Meeting[]
   createdAt: string
   qrData?: string | null
-  /** Agent who created/owns this lead (client–agent relationship) */
   createdById?: string | null
   createdByName?: string | null
 }
 
-/** Build full address from lead location fields */
 function fullAddress(lead: Lead): string {
   const parts = [
     lead.locationName,
     [lead.city, lead.state, lead.country].filter(Boolean).join(", "),
   ].filter(Boolean)
-  return parts.join(" · ") || "—"
+  return parts.join(" - ") || "--"
 }
 
-/** Extract phone numbers from text (Indian and international formats) */
 function extractPhoneNumbers(text: string): string[] {
   const phoneRegex = /(?:(?:\+|00)?91[\s.-]?)?(?:\(?\d{3,5}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}/g
   const matches = text.match(phoneRegex) || []
@@ -89,7 +86,6 @@ interface Stats {
   converted: number
 }
 
-// Info Modal Component for viewing details
 function InfoModal({ 
   title, 
   content, 
@@ -122,73 +118,65 @@ function InfoModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-linear-to-r from-blue-50 to-purple-50">
-          <div className="flex items-center gap-2">
-            {type === 'transcript' && <FileText className="h-5 w-5 text-blue-600" />}
-            {type === 'location' && <MapPin className="h-5 w-5 text-green-600" />}
-            {type === 'qrData' && <QrCodeIcon className="h-5 w-5 text-purple-600" />}
-            {type === 'emailHistory' && <Mail className="h-5 w-5 text-orange-600" />}
-            <h3 className="font-semibold text-slate-900">{title}</h3>
+    <div className="fixed inset-0 bg-foreground/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-card rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden border border-border" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-foreground flex items-center justify-center">
+              {type === 'transcript' && <FileText className="h-4 w-4 text-background" />}
+              {type === 'location' && <MapPin className="h-4 w-4 text-background" />}
+              {type === 'qrData' && <QrCodeIcon className="h-4 w-4 text-background" />}
+              {type === 'emailHistory' && <Mail className="h-4 w-4 text-background" />}
+            </div>
+            <h3 className="font-semibold text-foreground">{title}</h3>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 hover:bg-white/50 rounded-lg transition-colors"
-          >
-            <X className="h-4 w-4 text-slate-500" />
+          <button onClick={onClose} className="p-2 hover:bg-muted rounded-xl transition-colors">
+            <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-5 overflow-y-auto max-h-[calc(80vh-120px)]">
+        <div className="p-5 overflow-y-auto max-h-[calc(80vh-140px)]">
           {type === 'emailHistory' ? (
             emailHistory && emailHistory.length > 0 ? (
               <div className="space-y-3">
                 {emailHistory.map((email, idx) => (
-                  <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                  <div key={idx} className="p-4 bg-muted border border-border rounded-xl">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
-                        <p className="font-semibold text-slate-900 text-sm mb-1">{email.subject}</p>
+                        <p className="font-semibold text-foreground text-sm mb-1">{email.subject}</p>
                         <div className="flex flex-wrap gap-2 items-center">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            email.template.includes('followup') || email.template.includes('follow')
-                              ? 'bg-green-100 text-green-700 border border-green-200'
-                              : 'bg-blue-100 text-blue-700 border border-blue-200'
-                          }`}>
-                            {email.template.includes('followup') || email.template.includes('follow') ? '🔄 Follow-up' : '👋 Initial'}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-foreground text-background">
+                            {email.template.includes('followup') || email.template.includes('follow') ? 'Follow-up' : 'Initial'}
                           </span>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             Template: {email.template}
                           </span>
                         </div>
                       </div>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                         email.status === 'sent'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
+                          ? 'bg-foreground text-background'
+                          : 'bg-destructive/10 text-destructive'
                       }`}>
                         {email.status}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Sent: {new Date(email.sentAt).toLocaleString()}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-8">No emails sent yet</p>
+              <p className="text-muted-foreground text-center py-8">No emails sent yet</p>
             )
           ) : !content ? (
-            <p className="text-slate-400 text-center py-8">No data available</p>
+            <p className="text-muted-foreground text-center py-8">No data available</p>
           ) : (
             <>
-              {/* Phone numbers extracted from transcript */}
               {type === 'transcript' && phoneNumbers.length > 0 && (
-                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                  <p className="text-xs font-medium text-emerald-800 mb-2 flex items-center gap-1.5">
+                <div className="mb-4 p-4 bg-muted border border-border rounded-xl">
+                  <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5" />
                     Detected Phone Numbers
                   </p>
@@ -197,13 +185,13 @@ function InfoModal({
                       <button
                         key={idx}
                         onClick={() => copyToClipboard(phone, true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-emerald-300 rounded-md hover:bg-emerald-50 transition-colors group"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border rounded-lg hover:bg-muted transition-colors group"
                       >
-                        <span className="text-sm font-mono text-slate-700">{phone}</span>
+                        <span className="text-sm font-mono text-foreground">{phone}</span>
                         {copiedPhone === phone ? (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-foreground" />
                         ) : (
-                          <Copy className="h-3.5 w-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                          <Copy className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         )}
                       </button>
                     ))}
@@ -211,36 +199,33 @@ function InfoModal({
                 </div>
               )}
 
-              {/* QR Data with copy button */}
               {type === 'qrData' && (
                 <div className="mb-4">
                   <button
                     onClick={() => copyToClipboard(content)}
-                    className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors group"
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-muted border border-border rounded-xl hover:border-foreground/20 transition-colors group"
                   >
-                    <span className="text-sm text-slate-700 break-all text-left">{content}</span>
+                    <span className="text-sm text-foreground break-all text-left">{content}</span>
                     {copiedQr ? (
-                      <CheckCircle2 className="h-4 w-4 text-purple-600 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-foreground shrink-0" />
                     ) : (
-                      <Copy className="h-4 w-4 text-slate-400 group-hover:text-purple-600 transition-colors shrink-0" />
+                      <Copy className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
                     )}
                   </button>
                 </div>
               )}
 
-              {/* Main content */}
-              <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap bg-muted p-4 rounded-xl border border-border">
                 {content}
               </div>
             </>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-200 bg-slate-50">
+        <div className="p-4 border-t border-border">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-slate-900 text-white text-sm rounded-lg hover:bg-slate-800 transition-colors"
+            className="w-full px-4 py-2.5 bg-foreground text-background text-sm font-medium rounded-xl hover:bg-foreground/90 transition-colors"
           >
             Close
           </button>
@@ -250,7 +235,6 @@ function InfoModal({
   )
 }
 
-// Main Dashboard Component - No SSR
 function Dashboard() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
@@ -271,7 +255,6 @@ function Dashboard() {
   const { data: user, isLoading: userLoading } = useCurrentUser()
   const router = useRouter()
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!userLoading && !user) {
       router.push('/auth')
@@ -288,16 +271,6 @@ function Dashboard() {
         setLeads(json.data.leads || [])
         setStats(json.data.stats || null)
         setAgents(json.data.agents || [])
-        
-        // Debug: Log email history for leads to verify data
-        if (json.data.leads && json.data.leads.length > 0) {
-          console.log('Dashboard loaded with', json.data.leads.length, 'leads')
-          json.data.leads.forEach((lead: Lead) => {
-            if (lead.emailsSent && lead.emailsSent.length > 0) {
-              console.log(`Lead ${lead.name} emails:`, lead.emailsSent.map(e => e.template))
-            }
-          })
-        }
       }
     } catch (err) {
       console.error("Failed to fetch dashboard:", err)
@@ -310,60 +283,36 @@ function Dashboard() {
     fetchData()
   }, [])
 
-  const getTagColor = (tag: string | undefined | null) => {
-    if (tag === "hot") return "bg-linear-to-r from-red-500 to-orange-500 text-white"
-    if (tag === "warm") return "bg-linear-to-r from-yellow-500 to-amber-500 text-white"
-    return "bg-linear-to-r from-blue-500 to-cyan-500 text-white"
+  const getTagStyle = (tag: string | undefined | null) => {
+    if (tag === "hot") return "bg-foreground text-background"
+    if (tag === "warm") return "bg-muted-foreground/20 text-foreground"
+    return "bg-muted text-muted-foreground"
   }
 
-  const getStatusColor = (status: string | undefined | null) => {
-    if (status === "email_sent") return "bg-blue-100 text-blue-700 border border-blue-200"
-    if (status === "meeting_scheduled") return "bg-purple-100 text-purple-700 border border-purple-200"
-    if (status === "converted") return "bg-green-100 text-green-700 border border-green-200"
-    return "bg-slate-100 text-slate-700 border border-slate-200"
+  const getStatusStyle = (status: string | undefined | null) => {
+    if (status === "email_sent") return "bg-foreground/10 text-foreground border border-foreground/20"
+    if (status === "meeting_scheduled") return "bg-foreground/10 text-foreground border border-foreground/20"
+    if (status === "converted") return "bg-foreground text-background"
+    return "bg-muted text-muted-foreground border border-border"
   }
 
-  const openEmailModal = (lead: Lead) => {
-    setSelectedLead(lead)
-    setShowEmailModal(true)
-  }
+  const openEmailModal = (lead: Lead) => { setSelectedLead(lead); setShowEmailModal(true) }
+  const openMeetModal = (lead: Lead) => { setSelectedLead(lead); setShowMeetModal(true) }
+  const closeEmailModal = () => { setShowEmailModal(false); setSelectedLead(null) }
+  const closeMeetModal = () => { setShowMeetModal(false); setSelectedLead(null) }
+  const handleEmailSuccess = () => { closeEmailModal(); fetchData() }
+  const handleMeetSuccess = () => { closeMeetModal(); fetchData() }
 
-  const openMeetModal = (lead: Lead) => {
-    setSelectedLead(lead)
-    setShowMeetModal(true)
-  }
-
-  const closeEmailModal = () => {
-    setShowEmailModal(false)
-    setSelectedLead(null)
-  }
-
-  const closeMeetModal = () => {
-    setShowMeetModal(false)
-    setSelectedLead(null)
-  }
-
-  const handleEmailSuccess = () => {
-    closeEmailModal()
-    fetchData()
-  }
-
-  const handleMeetSuccess = () => {
-    closeMeetModal()
-    fetchData()
-  }
-
-  // Check if lead has been emailed (moves to follow-up stage)
   const hasBeenEmailed = (lead: Lead): boolean => {
     return Array.isArray(lead.emailsSent) && lead.emailsSent.length > 0
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-sm text-slate-600">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-foreground border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-sm text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -373,36 +322,32 @@ function Dashboard() {
       ? leads.filter((l) => (l.createdById ?? null) === filterByAgentId)
       : leads
 
-  // Separate leads into initial and follow-up sections
-  // Leads move to follow-up as soon as any email is sent
   const initialLeads = filteredLeads.filter(lead => !hasBeenEmailed(lead))
   const followUpLeads = filteredLeads.filter(lead => hasBeenEmailed(lead))
-  
-  // Get active section leads
   const currentSectionLeads = activeSection === 'initial' ? initialLeads : followUpLeads
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                 Lead Dashboard
               </h1>
-              <p className="text-sm text-slate-600 mt-2">
-                {isAdmin ? `👑 Admin View — ${initialLeads.length} initial, ${followUpLeads.length} follow-up` : `Welcome back, ${user?.name || 'User'}`}
+              <p className="text-sm text-muted-foreground mt-1">
+                {isAdmin ? `Admin View -- ${initialLeads.length} initial, ${followUpLeads.length} follow-up` : `Welcome back, ${user?.name || 'User'}`}
               </p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {isAdmin && agents.length > 0 && (
-                <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-slate-200 px-4 py-2">
-                  <Filter className="h-4 w-4 text-slate-500" />
+                <div className="flex items-center gap-2 bg-card rounded-xl border border-border px-4 py-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
                   <select
                     value={filterByAgentId ?? ''}
                     onChange={(e) => setFilterByAgentId(e.target.value || null)}
-                    className="text-sm text-slate-700 bg-transparent border-none outline-none cursor-pointer"
+                    className="text-sm text-foreground bg-transparent border-none outline-none cursor-pointer"
                   >
                     <option value="">All agents</option>
                     {agents.map((a) => (
@@ -416,9 +361,9 @@ function Dashboard() {
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className="px-4 py-2 bg-slate-900 text-white text-sm rounded-lg hover:bg-slate-800 transition-all shadow-sm hover:shadow-md"
+                  className="px-4 py-2 bg-foreground text-background text-sm font-medium rounded-xl hover:bg-foreground/90 transition-all"
                 >
-                  ⚙️ Admin Panel
+                  Admin Panel
                 </Link>
               )}
             </div>
@@ -427,61 +372,61 @@ function Dashboard() {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Total Leads</p>
-              <p className="text-3xl font-bold text-slate-900">{stats.total || 0}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <div className="bg-card p-5 rounded-xl border border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Total Leads</p>
+              <p className="text-3xl font-bold text-foreground">{stats.total || 0}</p>
             </div>
-            <div className="bg-linear-to-br from-red-50 to-red-100 p-5 rounded-xl shadow-sm border border-red-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-red-700 uppercase tracking-wide mb-1">🔥 Hot</p>
-              <p className="text-3xl font-bold text-red-600">{stats.hot || 0}</p>
+            <div className="bg-foreground p-5 rounded-xl">
+              <p className="text-xs font-medium text-background/60 uppercase tracking-wider mb-1">Hot</p>
+              <p className="text-3xl font-bold text-background">{stats.hot || 0}</p>
             </div>
-            <div className="bg-linear-to-br from-yellow-50 to-amber-100 p-5 rounded-xl shadow-sm border border-yellow-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-yellow-700 uppercase tracking-wide mb-1">🌡️ Warm</p>
-              <p className="text-3xl font-bold text-yellow-600">{stats.warm || 0}</p>
+            <div className="bg-card p-5 rounded-xl border border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Warm</p>
+              <p className="text-3xl font-bold text-foreground">{stats.warm || 0}</p>
             </div>
-            <div className="bg-linear-to-br from-blue-50 to-blue-100 p-5 rounded-xl shadow-sm border border-blue-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">❄️ Cold</p>
-              <p className="text-3xl font-bold text-blue-600">{stats.cold || 0}</p>
+            <div className="bg-card p-5 rounded-xl border border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Cold</p>
+              <p className="text-3xl font-bold text-foreground">{stats.cold || 0}</p>
             </div>
           </div>
         )}
 
         {/* Section Tabs */}
         <div className="mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-2 inline-flex gap-2">
+          <div className="bg-muted rounded-xl p-1 inline-flex gap-1">
             <button
               onClick={() => setActiveSection('initial')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
                 activeSection === 'initial'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
+                  ? 'bg-foreground text-background'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Users className="h-4 w-4" />
-              <span>Initial Contacts</span>
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+              <span>Initial</span>
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                 activeSection === 'initial'
-                  ? 'bg-white/20 text-white'
-                  : 'bg-slate-100 text-slate-700'
+                  ? 'bg-background/20 text-background'
+                  : 'bg-border text-muted-foreground'
               }`}>
                 {initialLeads.length}
               </span>
             </button>
             <button
               onClick={() => setActiveSection('followup')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
                 activeSection === 'followup'
-                  ? 'bg-green-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-50'
+                  ? 'bg-foreground text-background'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <UserCheck className="h-4 w-4" />
-              <span>Follow-up Stage</span>
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+              <span>Follow-up</span>
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                 activeSection === 'followup'
-                  ? 'bg-white/20 text-white'
-                  : 'bg-slate-100 text-slate-700'
+                  ? 'bg-background/20 text-background'
+                  : 'bg-border text-muted-foreground'
               }`}>
                 {followUpLeads.length}
               </span>
@@ -490,62 +435,60 @@ function Dashboard() {
         </div>
 
         {/* Leads Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-linear-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted">
+                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Lead Info
                   </th>
-                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Contact
                   </th>
                   {isAdmin && (
-                    <th className="px-4 py-3.5 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Agent
                     </th>
                   )}
-                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Priority
                   </th>
-                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-4 py-3.5 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <th className="px-4 py-3.5 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Details
                   </th>
-                  <th className="px-4 py-3.5 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <th className="px-4 py-3.5 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border">
                 {currentSectionLeads.length > 0 ? (
                   currentSectionLeads.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
-                      {/* Lead Info */}
+                    <tr key={lead.id} className="hover:bg-muted/50 transition-colors">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
+                          <div className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center text-background font-semibold text-sm">
                             {(lead.name || 'U')[0].toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-900 text-sm">{lead.name || "Unknown"}</p>
-                            <p className="text-xs text-slate-500">{lead.companyName || "—"}</p>
+                            <p className="font-semibold text-foreground text-sm">{lead.name || "Unknown"}</p>
+                            <p className="text-xs text-muted-foreground">{lead.companyName || "--"}</p>
                           </div>
                         </div>
                       </td>
 
-                      {/* Contact */}
                       <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <p className="text-sm text-slate-700">{lead.email || "—"}</p>
-                          <p className="text-xs text-slate-500">{lead.contactNo || "—"}</p>
+                          <p className="text-sm text-foreground">{lead.email || "--"}</p>
+                          <p className="text-xs text-muted-foreground">{lead.contactNo || "--"}</p>
                           {lead.emailsSent && lead.emailsSent.length > 0 && (
                             <div className="flex items-center gap-1 mt-1">
-                              <Mail className="h-3 w-3 text-blue-500" />
-                              <span className="text-xs text-blue-600 font-medium">
+                              <Mail className="h-3 w-3 text-foreground/50" />
+                              <span className="text-xs text-muted-foreground font-medium">
                                 {lead.emailsSent.length} email{lead.emailsSent.length > 1 ? 's' : ''} sent
                               </span>
                             </div>
@@ -553,39 +496,32 @@ function Dashboard() {
                         </div>
                       </td>
 
-                      {/* Agent (Admin only) */}
                       {isAdmin && (
                         <td className="px-4 py-4">
                           {lead.createdByName ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-foreground">
                               {lead.createdByName}
                             </span>
                           ) : (
-                            <span className="text-slate-400 text-xs">—</span>
+                            <span className="text-muted-foreground text-xs">--</span>
                           )}
                         </td>
                       )}
 
-                      {/* Priority */}
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getTagColor(lead.tags)}`}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getTagStyle(lead.tags)}`}>
                           {lead.tags ? lead.tags.toUpperCase() : "N/A"}
                         </span>
                       </td>
 
-                      {/* Status */}
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(lead.followUpStatus)}`}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyle(lead.followUpStatus)}`}>
                           {(lead.followUpStatus || "pending").replace(/_/g, " ")}
                         </span>
                       </td>
 
-                      {/* Detail Buttons */}
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-center gap-1.5">
-                          
-                          
-                          {/* Transcript */}
                           <button
                             onClick={() => setInfoModal({
                               show: true,
@@ -594,36 +530,34 @@ function Dashboard() {
                               type: 'transcript'
                             })}
                             disabled={!lead.voiceNoteTranscript}
-                            className={`p-2 rounded-lg transition-all ${
+                            className={`p-2 rounded-xl transition-all ${
                               lead.voiceNoteTranscript
-                                ? 'bg-blue-100 text-blue-600 hover:bg-blue-200 hover:shadow-sm'
-                                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                ? 'bg-muted text-foreground hover:bg-foreground hover:text-background'
+                                : 'bg-muted text-muted-foreground/30 cursor-not-allowed'
                             }`}
                             title={lead.voiceNoteTranscript ? "View transcript" : "No transcript"}
                           >
                             <FileText className="h-4 w-4" />
                           </button>
 
-                          {/* Location */}
                           <button
                             onClick={() => setInfoModal({
                               show: true,
                               title: `${lead.name}'s Location`,
-                              content: fullAddress(lead) !== "—" ? fullAddress(lead) : null,
+                              content: fullAddress(lead) !== "--" ? fullAddress(lead) : null,
                               type: 'location'
                             })}
-                            disabled={fullAddress(lead) === "—"}
-                            className={`p-2 rounded-lg transition-all ${
-                              fullAddress(lead) !== "—"
-                                ? 'bg-green-100 text-green-600 hover:bg-green-200 hover:shadow-sm'
-                                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                            disabled={fullAddress(lead) === "--"}
+                            className={`p-2 rounded-xl transition-all ${
+                              fullAddress(lead) !== "--"
+                                ? 'bg-muted text-foreground hover:bg-foreground hover:text-background'
+                                : 'bg-muted text-muted-foreground/30 cursor-not-allowed'
                             }`}
-                            title={fullAddress(lead) !== "—" ? "View location" : "No location"}
+                            title={fullAddress(lead) !== "--" ? "View location" : "No location"}
                           >
                             <MapPin className="h-4 w-4" />
                           </button>
 
-                          {/* QR Data */}
                           <button
                             onClick={() => setInfoModal({
                               show: true,
@@ -632,10 +566,10 @@ function Dashboard() {
                               type: 'qrData'
                             })}
                             disabled={!lead.qrData}
-                            className={`p-2 rounded-lg transition-all ${
+                            className={`p-2 rounded-xl transition-all ${
                               lead.qrData
-                                ? 'bg-purple-100 text-purple-600 hover:bg-purple-200 hover:shadow-sm'
-                                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                ? 'bg-muted text-foreground hover:bg-foreground hover:text-background'
+                                : 'bg-muted text-muted-foreground/30 cursor-not-allowed'
                             }`}
                             title={lead.qrData ? "View QR data" : "No QR data"}
                           >
@@ -644,19 +578,18 @@ function Dashboard() {
                         </div>
                       </td>
 
-                      {/* Action Buttons */}
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => openEmailModal(lead)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-all hover:shadow-md"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-xl hover:bg-foreground/90 transition-all"
                           >
                             <Mail className="h-3.5 w-3.5" />
                             Email
                           </button>
                           <button
                             onClick={() => openMeetModal(lead)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-all hover:shadow-md"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-muted text-foreground text-xs font-medium rounded-xl hover:bg-muted-foreground/10 transition-all border border-border"
                           >
                             <Video className="h-3.5 w-3.5" />
                             Meet
@@ -667,21 +600,21 @@ function Dashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={isAdmin ? 7 : 6} className="px-4 py-12 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                    <td colSpan={isAdmin ? 7 : 6} className="px-4 py-16 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
                           {activeSection === 'initial' ? (
-                            <Users className="h-8 w-8 text-slate-400" />
+                            <Users className="h-6 w-6 text-muted-foreground" />
                           ) : (
-                            <UserCheck className="h-8 w-8 text-slate-400" />
+                            <UserCheck className="h-6 w-6 text-muted-foreground" />
                           )}
                         </div>
-                        <p className="text-slate-500 font-medium">
+                        <p className="text-foreground font-medium text-sm">
                           {activeSection === 'initial' 
                             ? 'No initial contacts found' 
                             : 'No follow-up leads yet'}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-muted-foreground">
                           {activeSection === 'initial'
                             ? 'New leads will appear here first'
                             : 'Leads move here after sending a follow-up email'}
@@ -696,7 +629,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Info Modal */}
       {infoModal?.show && (
         <InfoModal
           title={infoModal.title}
@@ -706,7 +638,6 @@ function Dashboard() {
         />
       )}
 
-      {/* Email Modal */}
       {showEmailModal && selectedLead && (
         <EmailModal
           lead={selectedLead}
@@ -715,7 +646,6 @@ function Dashboard() {
         />
       )}
 
-      {/* Meet Modal */}
       {showMeetModal && selectedLead && (
         <MeetModal
           lead={selectedLead}
@@ -727,7 +657,6 @@ function Dashboard() {
   )
 }
 
-// Email Modal Component
 function EmailModal({
   lead,
   onClose,
@@ -764,60 +693,58 @@ function EmailModal({
   const leadTags = lead.tags || "warm"
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <div className="p-5 border-b border-slate-200 bg-linear-to-r from-blue-50 to-cyan-50">
+    <div className="fixed inset-0 bg-foreground/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-              <Mail className="h-5 w-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
+              <Mail className="h-5 w-5 text-background" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Send Email</h2>
-              <p className="text-sm text-slate-600">To {lead.name || "Lead"}</p>
+              <h2 className="text-base font-semibold text-foreground">Send Email</h2>
+              <p className="text-sm text-muted-foreground">To {lead.name || "Lead"}</p>
             </div>
           </div>
         </div>
         <div className="p-5 space-y-4">
           <div>
-            <p className="text-sm font-medium text-slate-700 mb-3">Email Type</p>
+            <p className="text-sm font-medium text-foreground mb-3">Email Type</p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setEmailType("initial")}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-4 rounded-xl border-2 transition-all text-center ${
                   emailType === "initial"
-                    ? "border-blue-500 bg-blue-50 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300"
+                    ? "border-foreground bg-muted"
+                    : "border-border hover:border-foreground/20"
                 }`}
               >
-                <span className="block text-2xl mb-1">👋</span>
-                <span className="text-sm font-medium text-slate-700">Initial</span>
+                <span className="text-sm font-medium text-foreground">Initial</span>
               </button>
               <button
                 type="button"
                 onClick={() => setEmailType("followup")}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-4 rounded-xl border-2 transition-all text-center ${
                   emailType === "followup"
-                    ? "border-blue-500 bg-blue-50 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300"
+                    ? "border-foreground bg-muted"
+                    : "border-border hover:border-foreground/20"
                 }`}
               >
-                <span className="block text-2xl mb-1">🔄</span>
-                <span className="text-sm font-medium text-slate-700">Follow Up</span>
+                <span className="text-sm font-medium text-foreground">Follow Up</span>
               </button>
             </div>
           </div>
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <p className="text-xs text-slate-600">
-              Template priority: <span className="font-semibold text-slate-900">{leadTags.toUpperCase()}</span>
+          <div className="p-3 bg-muted rounded-xl border border-border">
+            <p className="text-xs text-muted-foreground">
+              Template priority: <span className="font-semibold text-foreground">{leadTags.toUpperCase()}</span>
             </p>
           </div>
         </div>
-        <div className="p-5 border-t border-slate-200 bg-slate-50 flex gap-3">
+        <div className="p-5 border-t border-border flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+            className="flex-1 px-4 py-2.5 bg-muted border border-border text-foreground rounded-xl hover:bg-muted-foreground/10 transition-colors font-medium"
           >
             Cancel
           </button>
@@ -825,7 +752,7 @@ function EmailModal({
             type="button"
             onClick={sendEmail}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+            className="flex-1 px-4 py-2.5 bg-foreground text-background rounded-xl hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             {loading ? "Sending..." : "Send Email"}
           </button>
@@ -835,7 +762,6 @@ function EmailModal({
   )
 }
 
-// Meet Modal Component
 function MeetModal({
   lead,
   onClose,
@@ -880,7 +806,6 @@ function MeetModal({
           hostLink: json.data.hostLink || "",
           guestLink: json.data.guestLink || "",
         })
-
         if (meetType === "instant" && json.data.hostLink) {
           window.open(json.data.hostLink, "_blank")
         }
@@ -902,25 +827,24 @@ function MeetModal({
     }
   }
 
-  // Success View
   if (meetingData) {
     return (
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onSuccess}>
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <div className="p-5 border-b border-green-200 bg-linear-to-r from-green-50 to-emerald-50">
+      <div className="fixed inset-0 bg-foreground/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onSuccess}>
+        <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border" onClick={(e) => e.stopPropagation()}>
+          <div className="p-5 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-background" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-green-900">Meeting Created!</h2>
-                <p className="text-sm text-green-700">Invite sent to {lead.email || "lead"}</p>
+                <h2 className="text-base font-semibold text-foreground">Meeting Created!</h2>
+                <p className="text-sm text-muted-foreground">Invite sent to {lead.email || "lead"}</p>
               </div>
             </div>
           </div>
           <div className="p-5 space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
+            <div className="bg-muted p-4 rounded-xl border border-border">
+              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
                 <Video className="h-3.5 w-3.5" />
                 Your Host Link
               </p>
@@ -928,20 +852,20 @@ function MeetModal({
                 <input
                   value={meetingData.hostLink}
                   readOnly
-                  className="flex-1 text-xs bg-white border border-blue-200 rounded px-3 py-2 text-slate-700"
+                  className="flex-1 text-xs bg-card border border-border rounded-lg px-3 py-2 text-foreground"
                 />
                 <button
                   type="button"
                   onClick={() => copyToClipboard(meetingData.hostLink)}
-                  className="px-3 bg-blue-200 hover:bg-blue-300 rounded transition-colors"
+                  className="px-3 bg-muted hover:bg-muted-foreground/10 rounded-lg transition-colors border border-border"
                   title="Copy"
                 >
-                  <Copy className="h-4 w-4 text-blue-700" />
+                  <Copy className="h-4 w-4 text-foreground" />
                 </button>
               </div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-              <p className="text-xs font-semibold text-purple-700 mb-2 flex items-center gap-1.5">
+            <div className="bg-muted p-4 rounded-xl border border-border">
+              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5" />
                 Guest Link (sent to {lead.name || "guest"})
               </p>
@@ -949,24 +873,24 @@ function MeetModal({
                 <input
                   value={meetingData.guestLink}
                   readOnly
-                  className="flex-1 text-xs bg-white border border-purple-200 rounded px-3 py-2 text-slate-700"
+                  className="flex-1 text-xs bg-card border border-border rounded-lg px-3 py-2 text-foreground"
                 />
                 <button
                   type="button"
                   onClick={() => copyToClipboard(meetingData.guestLink)}
-                  className="px-3 bg-purple-200 hover:bg-purple-300 rounded transition-colors"
+                  className="px-3 bg-muted hover:bg-muted-foreground/10 rounded-lg transition-colors border border-border"
                   title="Copy"
                 >
-                  <Copy className="h-4 w-4 text-purple-700" />
+                  <Copy className="h-4 w-4 text-foreground" />
                 </button>
               </div>
             </div>
           </div>
-          <div className="p-5 border-t border-slate-200 bg-slate-50 flex gap-3">
+          <div className="p-5 border-t border-border flex gap-3">
             <button
               type="button"
               onClick={onSuccess}
-              className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2.5 bg-muted border border-border text-foreground rounded-xl hover:bg-muted-foreground/10 transition-colors font-medium"
             >
               Close
             </button>
@@ -977,7 +901,7 @@ function MeetModal({
                   window.open(meetingData.hostLink, "_blank")
                 }
               }}
-              className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-foreground text-background rounded-xl hover:bg-foreground/90 transition-colors font-medium flex items-center justify-center gap-2"
             >
               <Video className="h-4 w-4" />
               Start Meeting
@@ -988,48 +912,45 @@ function MeetModal({
     )
   }
 
-  // Create Meeting View
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <div className="p-5 border-b border-slate-200 bg-linear-to-r from-green-50 to-emerald-50">
+    <div className="fixed inset-0 bg-foreground/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
-              <Video className="h-5 w-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
+              <Video className="h-5 w-5 text-background" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Create Meeting</h2>
-              <p className="text-sm text-slate-600">With {lead.name || "Lead"}</p>
+              <h2 className="text-base font-semibold text-foreground">Create Meeting</h2>
+              <p className="text-sm text-muted-foreground">With {lead.name || "Lead"}</p>
             </div>
           </div>
         </div>
         <div className="p-5 space-y-5">
           <div>
-            <p className="text-sm font-medium text-slate-700 mb-3">Meeting Type</p>
+            <p className="text-sm font-medium text-foreground mb-3">Meeting Type</p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setMeetType("instant")}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-4 rounded-xl border-2 transition-all text-center ${
                   meetType === "instant"
-                    ? "border-green-500 bg-green-50 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300"
+                    ? "border-foreground bg-muted"
+                    : "border-border hover:border-foreground/20"
                 }`}
               >
-                <span className="block text-2xl mb-1">⚡</span>
-                <span className="text-sm font-medium text-slate-700">Instant</span>
+                <span className="text-sm font-medium text-foreground">Instant</span>
               </button>
               <button
                 type="button"
                 onClick={() => setMeetType("schedule")}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-4 rounded-xl border-2 transition-all text-center ${
                   meetType === "schedule"
-                    ? "border-green-500 bg-green-50 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300"
+                    ? "border-foreground bg-muted"
+                    : "border-border hover:border-foreground/20"
                 }`}
               >
-                <span className="block text-2xl mb-1">📅</span>
-                <span className="text-sm font-medium text-slate-700">Schedule</span>
+                <span className="text-sm font-medium text-foreground">Schedule</span>
               </button>
             </div>
           </div>
@@ -1037,26 +958,26 @@ function MeetModal({
           {meetType === "schedule" && (
             <div className="space-y-4 pt-2">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Date & Time</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Date & Time</label>
                 <input
                   type="datetime-local"
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className="w-full border border-border rounded-xl px-3 py-2.5 text-foreground bg-muted/50 focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Duration</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Duration</label>
                 <div className="grid grid-cols-4 gap-2">
                   {[15, 30, 45, 60].map((m) => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setDuration(m)}
-                      className={`py-2 rounded-lg font-medium text-sm transition-all ${
+                      className={`py-2 rounded-xl font-medium text-sm transition-all ${
                         duration === m
-                          ? "bg-green-600 text-white shadow-sm"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          ? "bg-foreground text-background"
+                          : "bg-muted text-foreground hover:bg-muted-foreground/10"
                       }`}
                     >
                       {m}m
@@ -1067,18 +988,18 @@ function MeetModal({
             </div>
           )}
 
-          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-            <p className="text-xs text-green-700 flex items-center gap-1.5">
+          <div className="p-3 bg-muted rounded-xl border border-border">
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Email invite will be sent to {lead.email || "lead"}
             </p>
           </div>
         </div>
-        <div className="p-5 border-t border-slate-200 bg-slate-50 flex gap-3">
+        <div className="p-5 border-t border-border flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+            className="flex-1 px-4 py-2.5 bg-muted border border-border text-foreground rounded-xl hover:bg-muted-foreground/10 transition-colors font-medium"
           >
             Cancel
           </button>
@@ -1086,7 +1007,7 @@ function MeetModal({
             type="button"
             onClick={createMeeting}
             disabled={loading || (meetType === "schedule" && !scheduleDate)}
-            className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-foreground text-background rounded-xl hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
           >
             {loading ? (
               "Creating..."
@@ -1096,9 +1017,7 @@ function MeetModal({
                 Start Now
               </>
             ) : (
-              <>
-                📅 Schedule
-              </>
+              "Schedule"
             )}
           </button>
         </div>
@@ -1107,7 +1026,6 @@ function MeetModal({
   )
 }
 
-// Export with dynamic import to prevent SSR hydration issues
 const DashboardClient = dynamic(() => Promise.resolve(Dashboard), {
   ssr: false,
 })

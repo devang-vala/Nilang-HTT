@@ -19,10 +19,10 @@ export default function SyncStatusBar() {
       className={`fixed top-0 left-0 right-0 z-50 px-4 py-2 flex items-center justify-between text-xs font-medium transition-colors
       ${
         !isOnline
-          ? "bg-amber-500 text-white"
+          ? "bg-foreground text-background"
           : pendingCount > 0
-          ? "bg-slate-800 text-slate-200"
-          : "bg-emerald-600 text-white"
+          ? "bg-foreground/90 text-background"
+          : "bg-foreground text-background"
       }`}
     >
       <div className="flex items-center gap-2">
@@ -33,7 +33,7 @@ export default function SyncStatusBar() {
         )}
         <span>
           {!isOnline
-            ? "Offline — changes saved locally"
+            ? "Offline -- changes saved locally"
             : pendingCount > 0
             ? `${pendingCount} contact${pendingCount > 1 ? "s" : ""} pending sync`
             : "All synced"}
@@ -51,7 +51,7 @@ export default function SyncStatusBar() {
           <button
             onClick={triggerSync}
             disabled={isSyncing}
-            className="flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded hover:bg-white/30 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-2 py-0.5 bg-background/10 rounded-lg hover:bg-background/20 transition-colors disabled:opacity-50"
           >
             <RefreshCw
               className={`h-3 w-3 ${isSyncing ? "animate-spin" : ""}`}

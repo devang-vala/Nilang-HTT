@@ -6,13 +6,6 @@ import { saveRecording, RecordingRecord } from "@/lib/audio/saveRecording";
 import { getAllRecordings } from "@/lib/audio/getPending";
 import { syncRecordings } from "@/lib/sync/syncRecording";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Mic, Square, Upload, Check, Clock, Wifi, WifiOff, Trash2 } from "lucide-react";
 
 function formatDuration(seconds: number): string {
@@ -56,7 +49,6 @@ export default function AudioRecorder() {
     }
   }, []);
 
-  // Load recordings on mount & listen for updates
   useEffect(() => {
     loadRecordings();
     setOnline(navigator.onLine);
@@ -79,7 +71,6 @@ export default function AudioRecorder() {
     };
   }, [loadRecordings]);
 
-  // Save the recorded audio to IndexedDB
   async function handleSave() {
     if (!audioBlob) return;
     setSaving(true);
@@ -87,8 +78,6 @@ export default function AudioRecorder() {
       await saveRecording(audioBlob);
       clearRecording();
       await loadRecordings();
-
-      // If online, immediately try to sync
       if (navigator.onLine) {
         setSyncing(true);
         await syncRecordings();
@@ -102,7 +91,6 @@ export default function AudioRecorder() {
     }
   }
 
-  // Manual sync trigger
   async function handleSync() {
     setSyncing(true);
     try {
@@ -119,44 +107,45 @@ export default function AudioRecorder() {
   return (
     <div className="space-y-6">
       {/* Connection Status */}
-      <div
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-          online
-            ? "bg-green-50 text-green-700 border border-green-200"
-            : "bg-amber-50 text-amber-700 border border-amber-200"
-        }`}
-      >
+      <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium border ${
+        online
+          ? "bg-muted border-border text-foreground"
+          : "bg-foreground border-foreground text-background"
+      }`}>
         {online ? (
           <>
-            <Wifi className="h-4 w-4" /> Online — recordings will sync
-            automatically
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            Online -- recordings will sync automatically
           </>
         ) : (
           <>
-            <WifiOff className="h-4 w-4" /> Offline — recordings saved locally
+            <WifiOff className="h-4 w-4" />
+            Offline -- recordings saved locally
           </>
         )}
       </div>
 
       {/* Recorder Card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Mic className="h-5 w-5" />
-            Voice Recorder
-          </CardTitle>
-          <CardDescription>
-            Record audio notes. They&apos;re saved offline and transcribed via AI
-            when online.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Recording controls */}
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="p-5 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
+              <Mic className="h-5 w-5 text-background" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Voice Recorder</h2>
+              <p className="text-xs text-muted-foreground">
+                Saved offline and transcribed via AI when online.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-5 space-y-4">
           <div className="flex items-center gap-4">
             {!isRecording && !audioBlob && (
               <Button
                 onClick={startRecording}
-                className="bg-red-500 hover:bg-red-600 text-white"
+                className="bg-destructive text-background hover:bg-destructive/90 rounded-xl"
               >
                 <Mic className="mr-2 h-4 w-4" />
                 Start Recording
@@ -167,17 +156,17 @@ export default function AudioRecorder() {
               <>
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive" />
                   </span>
-                  <span className="text-lg font-mono font-semibold text-red-600">
+                  <span className="text-lg font-mono font-semibold text-foreground">
                     {formatDuration(duration)}
                   </span>
                 </div>
                 <Button
                   onClick={stopRecording}
                   variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="border-border text-foreground hover:bg-muted rounded-xl"
                 >
                   <Square className="mr-2 h-4 w-4" />
                   Stop
@@ -187,15 +176,11 @@ export default function AudioRecorder() {
 
             {audioBlob && !isRecording && (
               <div className="flex items-center gap-3 w-full">
-                <audio
-                  src={audioUrl!}
-                  controls
-                  className="flex-1 h-10"
-                />
-                <Button onClick={handleSave} disabled={saving}>
-                  {saving ? "Saving…" : "Save"}
+                <audio src={audioUrl!} controls className="flex-1 h-10" />
+                <Button onClick={handleSave} disabled={saving} className="rounded-xl bg-foreground text-background hover:bg-foreground/90">
+                  {saving ? "Saving..." : "Save"}
                 </Button>
-                <Button variant="ghost" onClick={clearRecording}>
+                <Button variant="ghost" onClick={clearRecording} className="rounded-xl hover:bg-muted">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -203,20 +188,20 @@ export default function AudioRecorder() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+            <p className="text-sm text-destructive bg-destructive/5 px-3 py-2 rounded-xl">
               {error}
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Stats & Sync */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm text-slate-500">
-          <span className="flex items-center gap-1">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" /> {pendingCount} pending
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <Check className="h-4 w-4" /> {syncedCount} transcribed
           </span>
         </div>
@@ -226,9 +211,10 @@ export default function AudioRecorder() {
             size="sm"
             onClick={handleSync}
             disabled={syncing}
+            className="rounded-xl border-border"
           >
             <Upload className="mr-2 h-4 w-4" />
-            {syncing ? "Syncing…" : "Sync Now"}
+            {syncing ? "Syncing..." : "Sync Now"}
           </Button>
         )}
       </div>
@@ -236,53 +222,50 @@ export default function AudioRecorder() {
       {/* Recordings List */}
       {recordings.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-700">Recordings</h3>
+          <h3 className="text-sm font-semibold text-foreground">Recordings</h3>
           {recordings.map((rec) => (
-            <Card
+            <div
               key={rec.id}
-              className={`${
-                rec.synced
-                  ? "border-green-200 bg-green-50/50"
-                  : "border-amber-200 bg-amber-50/50"
+              className={`bg-card rounded-xl border p-4 space-y-2 ${
+                rec.synced ? "border-border" : "border-foreground/10"
               }`}
             >
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">
-                    {formatDate(rec.createdAt)}
-                  </span>
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      rec.synced
-                        ? "bg-green-100 text-green-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {rec.synced ? "Transcribed" : "Pending sync"}
-                  </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  {formatDate(rec.createdAt)}
+                </span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                  rec.synced
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {rec.synced ? "Transcribed" : "Pending"}
+                </span>
+              </div>
+
+              {rec.transcript && (
+                <div className="mt-2 text-sm text-foreground whitespace-pre-wrap bg-muted rounded-xl p-3 border border-border leading-relaxed">
+                  {rec.transcript}
                 </div>
+              )}
 
-                {rec.transcript && (
-                  <div className="mt-2 text-sm text-slate-700 whitespace-pre-wrap bg-white rounded-md p-3 border border-slate-100">
-                    {rec.transcript}
-                  </div>
-                )}
-
-                {!rec.synced && (
-                  <p className="text-xs text-slate-400 italic">
-                    Will be transcribed when online
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+              {!rec.synced && (
+                <p className="text-xs text-muted-foreground italic">
+                  Will be transcribed when online
+                </p>
+              )}
+            </div>
           ))}
         </div>
       )}
 
       {recordings.length === 0 && (
-        <div className="text-center py-8 text-slate-400">
-          <Mic className="h-8 w-8 mx-auto mb-2 opacity-40" />
-          <p className="text-sm">No recordings yet. Tap &quot;Start Recording&quot; to begin.</p>
+        <div className="text-center py-12">
+          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <Mic className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground mb-1">No recordings yet</p>
+          <p className="text-xs text-muted-foreground">Tap &quot;Start Recording&quot; to begin.</p>
         </div>
       )}
     </div>

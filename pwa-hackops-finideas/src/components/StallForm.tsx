@@ -85,7 +85,6 @@ export default function StallForm() {
     setError(null);
 
     try {
-      // Capture geolocation (non-blocking — still saves if denied/unavailable)
       let latitude: number | null = null;
       let longitude: number | null = null;
       try {
@@ -93,7 +92,7 @@ export default function StallForm() {
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
       } catch {
-        // Geolocation denied or unavailable — continue without it
+        // Geolocation denied or unavailable
       }
 
       const { contact, merged } = await saveContactLocally({
@@ -130,31 +129,29 @@ export default function StallForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between text-xs px-1">
-        <div className="flex items-center gap-1.5">
-          {isOnline() ? (
-            <>
-              <Wifi className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-emerald-600 font-medium">Online — will sync immediately</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-amber-600 font-medium">Offline — saved locally</span>
-            </>
-          )}
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Status */}
+      <div className="flex items-center gap-2 text-xs px-1">
+        {isOnline() ? (
+          <>
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-muted-foreground font-medium">Online</span>
+          </>
+        ) : (
+          <>
+            <div className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-muted-foreground font-medium">Offline -- saved locally</span>
+          </>
+        )}
       </div>
 
       {/* Name */}
-      <div className="space-y-1.5">
-        <Label htmlFor="stall-name" className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Full Name *
+      <div className="space-y-2">
+        <Label htmlFor="stall-name" className="text-xs font-medium text-muted-foreground">
+          Full Name
         </Label>
         <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
           <input
             id="stall-name"
             type="text"
@@ -164,18 +161,18 @@ export default function StallForm() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="John Doe"
-            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
           />
         </div>
       </div>
 
       {/* Company */}
-      <div className="space-y-1.5">
-        <Label htmlFor="stall-company" className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+      <div className="space-y-2">
+        <Label htmlFor="stall-company" className="text-xs font-medium text-muted-foreground">
           Company
         </Label>
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
           <input
             id="stall-company"
             type="text"
@@ -183,19 +180,19 @@ export default function StallForm() {
             value={form.companyName}
             onChange={(e) => setForm({ ...form, companyName: e.target.value })}
             placeholder="Acme Corp"
-            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
           />
         </div>
       </div>
 
-      {/* Phone & Email Row */}
+      {/* Phone & Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="stall-phone" className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Phone *
+        <div className="space-y-2">
+          <Label htmlFor="stall-phone" className="text-xs font-medium text-muted-foreground">
+            Phone
           </Label>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               id="stall-phone"
               type="tel"
@@ -203,16 +200,16 @@ export default function StallForm() {
               value={form.contactNo}
               onChange={(e) => setForm({ ...form, contactNo: e.target.value })}
               placeholder="+91 98765 43210"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
             />
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="stall-email" className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Email *
+        <div className="space-y-2">
+          <Label htmlFor="stall-email" className="text-xs font-medium text-muted-foreground">
+            Email
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               id="stall-email"
               type="email"
@@ -220,15 +217,15 @@ export default function StallForm() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="john@acme.com"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* Priority Tags */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">
           Lead Priority
         </Label>
         <div className="grid grid-cols-3 gap-2">
@@ -237,25 +234,21 @@ export default function StallForm() {
               type="button"
               key={tag}
               onClick={() => setForm({ ...form, tags: tag })}
-              className={`py-2.5 rounded-md text-sm font-medium transition-all border
+              className={`py-2.5 rounded-xl text-sm font-medium transition-all border
                 ${form.tags === tag
-                  ? tag === "hot"
-                    ? "bg-red-50 border-red-300 text-red-700 ring-2 ring-red-200"
-                    : tag === "warm"
-                    ? "bg-amber-50 border-amber-300 text-amber-700 ring-2 ring-amber-200"
-                    : "bg-blue-50 border-blue-300 text-blue-700 ring-2 ring-blue-200"
-                  : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
+                  ? "bg-foreground border-foreground text-background"
+                  : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
                 }`}
             >
-              {tag === "hot" ? "🔥 Hot" : tag === "warm" ? "🌡️ Warm" : "❄️ Cold"}
+              {tag === "hot" ? "Hot" : tag === "warm" ? "Warm" : "Cold"}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Scan card (OCR) + Photo */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+      {/* Scan card + Photo */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">
           Scan card or photo
         </Label>
         <div className="flex gap-2">
@@ -271,7 +264,7 @@ export default function StallForm() {
             type="button"
             variant="outline"
             size="sm"
-            className="rounded-md gap-1.5 flex-1"
+            className="rounded-xl gap-2 flex-1 h-11 border-border text-foreground hover:bg-muted"
             onClick={() => scanInputRef.current?.click()}
             disabled={ocrScanning}
           >
@@ -280,11 +273,11 @@ export default function StallForm() {
             ) : (
               <ScanLine className="h-4 w-4" />
             )}
-            {ocrScanning ? "Scanning…" : "Scan visiting card"}
+            {ocrScanning ? "Scanning..." : "Scan card"}
           </Button>
-          <label className="flex-1 flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-slate-200 rounded-md cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-all text-sm text-slate-500">
+          <label className="flex-1 flex items-center justify-center gap-2 h-11 border border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-all text-sm text-muted-foreground">
             <Camera className="h-4 w-4" />
-            {photoPreview ? "Change photo" : "Photo"}
+            {photoPreview ? "Change" : "Photo"}
             <input
               type="file"
               accept="image/*"
@@ -300,16 +293,16 @@ export default function StallForm() {
             <img
               src={photoPreview}
               alt="Preview"
-              className="w-full h-32 object-cover rounded-md border border-slate-200"
+              className="w-full h-32 object-cover rounded-xl border border-border"
             />
           </div>
         )}
       </div>
 
-      {/* QR Code Scanner (optional) */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Scan QR Code <span className="text-slate-400 normal-case">(optional)</span>
+      {/* QR Code Scanner */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">
+          Scan QR Code <span className="text-muted-foreground/50 normal-case">(optional)</span>
         </Label>
         <InlineQRScanner
           value={qrData}
@@ -320,50 +313,48 @@ export default function StallForm() {
 
       {/* Error */}
       {error && (
-        <Alert variant="destructive" className="rounded-md">
+        <Alert variant="destructive" className="rounded-xl">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* Success / Duplicate message (product-style) */}
+      {/* Success */}
       {submitted && (
-        <Alert
-          className={`rounded-md border ${
+        <div
+          className={`flex items-center gap-3 p-4 rounded-xl border ${
             submittedMerged
-              ? "bg-blue-50 border-blue-200 text-blue-800 [&_svg]:text-blue-600"
-              : "bg-emerald-50 border-emerald-200 text-emerald-800 [&_svg]:text-emerald-600"
+              ? "bg-muted border-border"
+              : "bg-muted border-border"
           }`}
         >
           {submittedMerged ? (
-            <Merge className="size-4" />
+            <Merge className="h-5 w-5 text-foreground shrink-0" />
           ) : (
-            <CheckCircle2 className="size-4" />
+            <CheckCircle2 className="h-5 w-5 text-foreground shrink-0" />
           )}
-          <AlertDescription className="col-start-2">
-            {submittedMerged ? (
-              <>
-                <span className="font-medium">Existing contact updated</span>
-                <span className="block text-xs opacity-90 mt-0.5">
-                  We found a contact with the same email or phone and merged your details.
-                </span>
-              </>
-            ) : (
-              "Contact saved!"
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {submittedMerged ? "Contact updated" : "Contact saved!"}
+            </p>
+            {submittedMerged && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Merged with existing contact data.
+              </p>
             )}
-          </AlertDescription>
-        </Alert>
+          </div>
+        </div>
       )}
 
       {/* Submit */}
       <Button
         type="submit"
         disabled={isSubmitting || submitted}
-        className="w-full py-6 rounded-md text-sm font-semibold bg-slate-900 hover:bg-slate-800 transition-all disabled:opacity-50"
+        className="w-full h-12 rounded-xl text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all disabled:opacity-50"
       >
         {submitted ? (
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-            Contact Saved!
+            <CheckCircle2 className="h-4 w-4" />
+            Saved
           </span>
         ) : isSubmitting ? (
           <span className="flex items-center gap-2">

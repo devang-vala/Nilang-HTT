@@ -17,7 +17,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0f172a",
+  themeColor: "#FAFAFA",
 };
 
 export const metadata: Metadata = {
@@ -53,7 +53,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased bg-slate-50 text-slate-900`}
+        className={`${inter.variable} font-sans antialiased bg-background text-foreground`}
       >
         <QueryProvider>
           <OCRInitializer />

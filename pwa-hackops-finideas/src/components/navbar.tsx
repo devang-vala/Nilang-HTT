@@ -29,7 +29,6 @@ export default function Navbar() {
       .slice(0, 2)
   }
 
-  // Don't show navbar on auth pages
   if (
     pathname?.startsWith('/auth') ||
     pathname?.startsWith('/forgot-password') ||
@@ -44,43 +43,43 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="border-b mt-6 border-slate-100 bg-white/80 backdrop-blur-lg sticky top-0 z-40">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-7 w-7 bg-slate-900 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">F</span>
+    <nav className="bg-card sticky top-0 z-40 border-b border-border">
+      <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="h-8 w-8 bg-foreground rounded-xl flex items-center justify-center">
+            <span className="text-background text-sm font-bold">F</span>
           </div>
-          <span className="text-sm font-semibold text-slate-900 tracking-tight">
-            Finideas Connect
+          <span className="text-sm font-semibold text-foreground tracking-tight">
+            Finideas
           </span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {loading ? (
-            <div className="h-8 w-8 animate-pulse bg-slate-200 rounded-full" />
+            <div className="h-9 w-9 animate-pulse bg-muted rounded-full" />
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-8 w-8 rounded-full p-0"
+                  className="relative h-9 w-9 rounded-full p-0 hover:bg-muted"
                 >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-slate-900 text-white text-xs font-medium">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-foreground text-background text-xs font-semibold">
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-md">
+              <DropdownMenuContent align="end" className="w-56 rounded-xl border-border shadow-lg">
                 <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user.name}</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold text-foreground">{user.name}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
-                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full w-fit mt-1 ${
+                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full w-fit mt-0.5 font-medium ${
                       user.role === 'admin'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-blue-100 text-blue-700'
+                        ? 'bg-foreground text-background'
+                        : 'bg-muted text-muted-foreground'
                     }`}>
                       {user.role === 'admin' ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
                       {user.role === 'admin' ? 'Admin' : 'User'}
@@ -125,7 +124,7 @@ export default function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
@@ -134,7 +133,7 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <Link href="/auth">
-              <Button size="sm" className="rounded-md text-xs h-8 px-4 bg-slate-900 hover:bg-slate-800">
+              <Button size="sm" className="rounded-xl text-xs h-9 px-5 bg-foreground text-background hover:bg-foreground/90">
                 Login
               </Button>
             </Link>
