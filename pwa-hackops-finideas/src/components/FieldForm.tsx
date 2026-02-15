@@ -24,8 +24,6 @@ import {
   ScanLine,
   CheckCircle2,
   Loader2,
-  WifiOff,
-  Wifi,
   Trash2,
   StickyNote,
   Merge,
@@ -102,7 +100,6 @@ export default function FieldForm() {
         voiceNoteTranscript = await transcribeVoiceNote(audio.audioBlob);
       }
 
-      // Capture geolocation (non-blocking — still saves if denied/unavailable)
       let latitude: number | null = null;
       let longitude: number | null = null;
       try {
@@ -110,7 +107,7 @@ export default function FieldForm() {
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
       } catch {
-        // Geolocation denied or unavailable — continue without it
+        // Geolocation denied or unavailable
       }
 
       const { contact, merged } = await saveContactLocally({
@@ -166,32 +163,28 @@ export default function FieldForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between text-xs px-1">
-        <div className="flex items-center gap-1.5">
-          {isOnline() ? (
-            <>
-              <Wifi className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-emerald-600 font-medium">Online</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-amber-600 font-medium">Offline — saved locally</span>
-            </>
-          )}
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Status */}
+      <div className="flex items-center gap-2 text-xs px-1">
+        {isOnline() ? (
+          <>
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-muted-foreground font-medium">Online</span>
+          </>
+        ) : (
+          <>
+            <div className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-muted-foreground font-medium">Offline -- saved locally</span>
+          </>
+        )}
       </div>
 
       {/* Name & Company */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Name *
-          </Label>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Name</Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               type="text"
               required
@@ -199,22 +192,20 @@ export default function FieldForm() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Contact name"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
             />
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Company
-          </Label>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Company</Label>
           <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               type="text"
               value={form.companyName}
               onChange={(e) => setForm({ ...form, companyName: e.target.value })}
               placeholder="Company"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
             />
           </div>
         </div>
@@ -222,45 +213,39 @@ export default function FieldForm() {
 
       {/* Phone & Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Phone *
-          </Label>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Phone</Label>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               type="tel"
               required
               value={form.contactNo}
               onChange={(e) => setForm({ ...form, contactNo: e.target.value })}
               placeholder="+91 98765 43210"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
             />
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Email *
-          </Label>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Email</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               type="email"
               required
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="contact@email.com"
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all"
             />
           </div>
         </div>
       </div>
 
-      {/* Scan card (OCR) + Photo */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Scan card or photo
-        </Label>
+      {/* Scan card + Photo */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">Scan card or photo</Label>
         <div className="flex gap-2">
           <input
             ref={scanInputRef}
@@ -274,7 +259,7 @@ export default function FieldForm() {
             type="button"
             variant="outline"
             size="sm"
-            className="rounded-md gap-1.5 flex-1"
+            className="rounded-xl gap-2 flex-1 h-11 border-border text-foreground hover:bg-muted"
             onClick={() => scanInputRef.current?.click()}
             disabled={ocrScanning}
           >
@@ -283,9 +268,9 @@ export default function FieldForm() {
             ) : (
               <ScanLine className="h-4 w-4" />
             )}
-            {ocrScanning ? "Scanning…" : "Scan card"}
+            {ocrScanning ? "Scanning..." : "Scan card"}
           </Button>
-          <label className="flex-1 flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-slate-200 rounded-md cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-all text-sm text-slate-500">
+          <label className="flex-1 flex items-center justify-center gap-2 h-11 border border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-all text-sm text-muted-foreground">
             <Camera className="h-4 w-4" />
             {photoPreview ? "Change" : "Photo"}
             <input
@@ -302,15 +287,15 @@ export default function FieldForm() {
           <img
             src={photoPreview}
             alt="Card preview"
-            className="w-full h-28 object-cover rounded-md border border-slate-200 mt-2"
+            className="w-full h-28 object-cover rounded-xl border border-border mt-2"
           />
         )}
       </div>
 
-      {/* QR Code Scanner (optional) */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Scan QR Code <span className="text-slate-400 normal-case">(optional)</span>
+      {/* QR Code Scanner */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">
+          Scan QR Code <span className="text-muted-foreground/50 normal-case">(optional)</span>
         </Label>
         <InlineQRScanner
           value={qrData}
@@ -320,16 +305,14 @@ export default function FieldForm() {
       </div>
 
       {/* Voice Note */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Voice Note
-        </Label>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">Voice Note</Label>
         <div className="flex items-center gap-2">
           {!audio.isRecording && !audio.audioBlob && (
             <button
               type="button"
               onClick={audio.startRecording}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-md text-sm font-medium hover:bg-slate-800 transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 bg-foreground text-background rounded-xl text-sm font-medium hover:bg-foreground/90 transition-all"
             >
               <Mic className="h-4 w-4" />
               Record Note
@@ -339,10 +322,10 @@ export default function FieldForm() {
             <button
               type="button"
               onClick={audio.stopRecording}
-              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-md text-sm font-medium animate-pulse"
+              className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-background rounded-xl text-sm font-medium animate-pulse"
             >
               <MicOff className="h-4 w-4" />
-              Stop · {formatDuration(audio.duration)}
+              Stop {formatDuration(audio.duration)}
             </button>
           )}
           {audio.audioBlob && !audio.isRecording && (
@@ -351,7 +334,7 @@ export default function FieldForm() {
               <button
                 type="button"
                 onClick={audio.clearRecording}
-                className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                className="p-2 text-muted-foreground hover:text-destructive transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -359,72 +342,62 @@ export default function FieldForm() {
           )}
         </div>
         {audio.error && (
-          <p className="text-xs text-red-500 mt-1">{audio.error}</p>
+          <p className="text-xs text-destructive mt-1">{audio.error}</p>
         )}
       </div>
 
       {/* Quick Notes */}
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Quick Notes
-        </Label>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">Quick Notes</Label>
         <div className="relative">
-          <StickyNote className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          <StickyNote className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/50" />
           <textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             placeholder="Key discussion points, interests, follow-up items..."
             rows={3}
-            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all resize-none"
+            className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all resize-none"
           />
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <Alert variant="destructive" className="rounded-md">
+        <Alert variant="destructive" className="rounded-xl">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* Success / Duplicate message (product-style) */}
+      {/* Success */}
       {submitted && (
-        <Alert
-          className={`rounded-md border ${
-            submittedMerged
-              ? "bg-blue-50 border-blue-200 text-blue-800 [&_svg]:text-blue-600"
-              : "bg-emerald-50 border-emerald-200 text-emerald-800 [&_svg]:text-emerald-600"
-          }`}
-        >
+        <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-muted">
           {submittedMerged ? (
-            <Merge className="size-4" />
+            <Merge className="h-5 w-5 text-foreground shrink-0" />
           ) : (
-            <CheckCircle2 className="size-4" />
+            <CheckCircle2 className="h-5 w-5 text-foreground shrink-0" />
           )}
-          <AlertDescription className="col-start-2">
-            {submittedMerged ? (
-              <>
-                <span className="font-medium">Existing contact updated</span>
-                <span className="block text-xs opacity-90 mt-0.5">
-                  We found a contact with the same email or phone and merged your details.
-                </span>
-              </>
-            ) : (
-              "Captured!"
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {submittedMerged ? "Contact updated" : "Captured!"}
+            </p>
+            {submittedMerged && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Merged with existing contact data.
+              </p>
             )}
-          </AlertDescription>
-        </Alert>
+          </div>
+        </div>
       )}
 
       {/* Submit */}
       <Button
         type="submit"
         disabled={isSubmitting || submitted}
-        className="w-full py-6 rounded-md text-sm font-semibold bg-slate-900 hover:bg-slate-800 transition-all disabled:opacity-50"
+        className="w-full h-12 rounded-xl text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all disabled:opacity-50"
       >
         {submitted ? (
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            <CheckCircle2 className="h-4 w-4" />
             Captured!
           </span>
         ) : isSubmitting ? (

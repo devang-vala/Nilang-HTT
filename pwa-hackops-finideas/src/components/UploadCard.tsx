@@ -4,7 +4,7 @@ import { useState } from "react";
 import { saveLead, processLeadOCR } from "@/lib/leadService";
 import { v4 as uuidv4 } from "uuid";
 import { Camera, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 
 export default function UploadCard() {
   const [isProcessing, setIsProcessing] = useState(false);

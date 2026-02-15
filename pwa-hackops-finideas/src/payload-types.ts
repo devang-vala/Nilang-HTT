@@ -321,7 +321,8 @@ export interface EmailTemplate {
 export interface ScheduledEmail {
   id: string;
   lead: string | Lead;
-  template: string | EmailTemplate;
+  template?: (string | null) | EmailTemplate;
+  emailType?: ('initial' | 'followup') | null;
   scheduledAt: string;
   status?: ('pending' | 'sent' | 'failed' | 'cancelled') | null;
   sentAt?: string | null;
@@ -524,6 +525,7 @@ export interface EmailTemplatesSelect<T extends boolean = true> {
 export interface ScheduledEmailsSelect<T extends boolean = true> {
   lead?: T;
   template?: T;
+  emailType?: T;
   scheduledAt?: T;
   status?: T;
   sentAt?: T;

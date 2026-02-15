@@ -1,50 +1,11 @@
 [
-  {
-    "name": "Hot Lead - Initial Contact",
-    "priority": "hot",
-    "type": "initial",
-    "subject": "Great meeting you, {{name}}!",
-    "body": "Dear {{name}},\n\nIt was wonderful meeting you at the conference! I could sense your keen interest in our investment solutions.\n\nAt FinIdeas, we specialize in helping professionals like you maximize their investment returns with personalized strategies.\n\nI'd love to schedule a quick call to discuss how we can help you achieve your financial goals.\n\nLooking forward to connecting soon!\n\nBest regards,\nFinIdeas Team",
-    "isActive": true
-  },
-  {
-    "name": "Hot Lead - Meeting Invite",
-    "priority": "hot",
-    "type": "meeting",
-    "subject": "Your Exclusive Consultation - {{name}}",
-    "body": "Dear {{name}},\n\nThank you for your interest in FinIdeas!\n\nI've scheduled a personal consultation for you:\n\n📅 Date: {{date}}\n🔗 Meeting Link: {{meetLink}}\n\nIn this session, we'll discuss:\n- Your current investment portfolio\n- Personalized strategies for your goals\n- Exclusive opportunities available to you\n\nPlease join on time. Looking forward to our conversation!\n\nBest regards,\nFinIdeas Team",
-    "isActive": true
-  },
-  {
-    "name": "Warm Lead - Initial Contact",
-    "priority": "warm",
-    "type": "initial",
-    "subject": "Nice connecting with you, {{name}}",
-    "body": "Dear {{name}},\n\nThank you for stopping by our stall at the conference!\n\nAt FinIdeas, we offer a range of investment solutions tailored to different risk appetites and financial goals.\n\nI'd be happy to share more information about our services. Would you be interested in a brief call?\n\nFeel free to reply to this email with your preferred time.\n\nBest regards,\nFinIdeas Team",
-    "isActive": true
-  },
-  {
-    "name": "Warm Lead - Follow Up",
-    "priority": "warm",
-    "type": "followup",
-    "subject": "Following up - FinIdeas Investment Solutions",
-    "body": "Dear {{name}},\n\nI hope this email finds you well!\n\nI wanted to follow up on our conversation at the conference. Have you had a chance to think about your investment goals?\n\nWe have some exciting opportunities that might interest you. I'd love to share more details.\n\nLet me know if you'd like to schedule a quick call.\n\nBest regards,\nFinIdeas Team",
-    "isActive": true
-  },
-  {
-    "name": "Cold Lead - Initial Contact",
-    "priority": "cold",
-    "type": "initial",
-    "subject": "Discover Smart Investment Strategies - FinIdeas",
-    "body": "Dear {{name}},\n\nThank you for visiting us at the recent conference.\n\nAt FinIdeas, we help individuals and businesses make informed investment decisions. Whether you're just starting out or looking to diversify your portfolio, we have solutions for you.\n\nHere's what we offer:\n- Expert market analysis\n- Personalized investment plans\n- Regular portfolio reviews\n\nIf you'd like to learn more, feel free to reply to this email.\n\nBest regards,\nFinIdeas Team",
-    "isActive": true
-  },
-  {
-    "name": "Cold Lead - Follow Up",
-    "priority": "cold",
-    "type": "followup",
-    "subject": "Still thinking about investments? - FinIdeas",
-    "body": "Dear {{name}},\n\nI wanted to check in and see if you've had any thoughts about exploring investment opportunities.\n\nNo pressure at all - I understand these decisions take time. But if you ever want to discuss your options, I'm here to help.\n\nFeel free to reach out anytime.\n\nBest regards,\nFinIdeas Team",
-    "isActive": true
-  }
+  {"name":"Finideas – Hot Initial","priority":"hot","type":"initial","subject":"Great meeting you, {{name}}!","body":"Dear {{name}},\n\nIt was wonderful meeting you at the conference! I could sense your keen interest in our investment solutions.\n\nAt Finideas, we specialize in helping professionals like you maximize their investment returns with personalized strategies.\n\nI'd love to schedule a quick call to discuss how we can help you achieve your financial goals.\n\nLooking forward to connecting soon!\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Hot Follow Up","priority":"hot","type":"followup","subject":"Quick follow-up, {{name}}!","body":"Dear {{name}},\n\nI wanted to quickly follow up on our conversation at the conference.\n\nI've been thinking about {{companyName}}'s needs, and I believe we have some exciting solutions that could be a perfect fit.\n\nJust reply with your preferred time, and I'll send over a calendar invite.\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Hot Meeting","priority":"hot","type":"meeting","subject":"Your Meeting is Confirmed - {{name}}","body":"Dear {{name}},\n\nYour meeting has been scheduled!\n\n📅 Date & Time: {{date}}\n🔗 Meeting Link: {{meetLink}}\n\nHow to Join:\n1. Click the meeting link at the scheduled time\n2. Allow camera & microphone access\n3. Enter your name and join\n\nLooking forward to our conversation!\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Warm Initial","priority":"warm","type":"initial","subject":"Nice connecting with you, {{name}}","body":"Dear {{name}},\n\nThank you for stopping by our stall at the conference!\n\nAt Finideas, we offer a range of investment solutions tailored to different risk appetites and financial goals.\n\nI'd be happy to share more information about our services. Would you be interested in a brief call?\n\nFeel free to reply to this email with your preferred time.\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Warm Follow Up","priority":"warm","type":"followup","subject":"Following up - Finideas Investment Solutions","body":"Dear {{name}},\n\nI hope this email finds you well!\n\nI wanted to follow up on our conversation at the conference. Have you had a chance to think about your investment goals?\n\nWe have some exciting opportunities that might interest you. I'd love to share more details.\n\nLet me know if you'd like to schedule a quick call.\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Warm Meeting","priority":"warm","type":"meeting","subject":"Your Meeting is Confirmed - {{name}}","body":"Dear {{name}},\n\nGreat news! Your meeting has been scheduled.\n\n📅 Date & Time: {{date}}\n🔗 Meeting Link: {{meetLink}}\n\nHow to Join:\nSimply click the link above at the scheduled time. No account or download needed!\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Cold Initial","priority":"cold","type":"initial","subject":"Thanks for visiting us, {{name}}","body":"Dear {{name}},\n\nThank you for visiting us at the recent conference.\n\nAt Finideas, we help individuals and businesses make informed investment decisions. Whether you're just starting out or looking to diversify your portfolio, we have solutions for you.\n\nIf you'd like to learn more, feel free to reply to this email.\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Cold Follow Up","priority":"cold","type":"followup","subject":"Still thinking about investments? - Finideas","body":"Dear {{name}},\n\nI wanted to check in and see if you've had any thoughts about exploring investment opportunities.\n\nNo pressure at all - I understand these decisions take time. But if you ever want to discuss your options, I'm here to help.\n\nFeel free to reach out anytime.\n\nBest regards,\nFinideas Team","isActive":true},
+  {"name":"Finideas – Cold Meeting (Scheduled)","priority":"cold","type":"meeting","subject":"Your Meeting Details - {{name}}","body":"Dear {{name}},\n\nYour meeting has been scheduled.\n\n📅 Date & Time: {{date}}\n🔗 Meeting Link: {{meetLink}}\n\nThis will be a casual, no-pressure conversation. Feel free to reach out if you have any questions.\n\nBest regards,\nFinideas Team","isActive":true}
 ]

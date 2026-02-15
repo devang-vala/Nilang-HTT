@@ -17,7 +17,10 @@ import {
   Video,
   Filter,
   Users,
-  UserCheck
+  UserCheck,
+  PieChart as PieChartIcon,
+  Clock,
+  CalendarClock
 } from "lucide-react"
 
 interface Meeting {
@@ -55,6 +58,7 @@ interface Lead {
   /** Agent who created/owns this lead (client–agent relationship) */
   createdById?: string | null
   createdByName?: string | null
+  scheduledEmails?: Array<{ scheduledAt: string; emailType: string }>
 }
 
 /** Build full address from lead location fields */
@@ -261,6 +265,7 @@ function Dashboard() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showMeetModal, setShowMeetModal] = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [infoModal, setInfoModal] = useState<{
     show: boolean
     title: string
@@ -268,6 +273,7 @@ function Dashboard() {
     type: 'transcript' | 'location' | 'qrData' | 'emailHistory'
     emailHistory?: EmailSent[]
   } | null>(null)
+  const [chartModal, setChartModal] = useState<'tags' | 'agents' | null>(null)
   const { data: user, isLoading: userLoading } = useCurrentUser()
   const router = useRouter()
 
@@ -343,6 +349,16 @@ function Dashboard() {
     setSelectedLead(null)
   }
 
+  const openScheduleModal = (lead: Lead) => {
+    setSelectedLead(lead)
+    setShowScheduleModal(true)
+  }
+
+  const closeScheduleModal = () => {
+    setShowScheduleModal(false)
+    setSelectedLead(null)
+  }
+
   const handleEmailSuccess = () => {
     closeEmailModal()
     fetchData()
@@ -353,9 +369,16 @@ function Dashboard() {
     fetchData()
   }
 
-  // Check if lead has been emailed (moves to follow-up stage)
-  const hasBeenEmailed = (lead: Lead): boolean => {
-    return Array.isArray(lead.emailsSent) && lead.emailsSent.length > 0
+  const handleScheduleSuccess = () => {
+    closeScheduleModal()
+    fetchData()
+  }
+
+  // Check if lead has been contacted (email sent OR meeting scheduled → follow-up stage)
+  const hasBeenContacted = (lead: Lead): boolean => {
+    const hasEmail = Array.isArray(lead.emailsSent) && lead.emailsSent.length > 0
+    const hasMeeting = Array.isArray(lead.meetings) && lead.meetings.length > 0
+    return hasEmail || hasMeeting
   }
 
   if (loading) {
@@ -374,9 +397,9 @@ function Dashboard() {
       : leads
 
   // Separate leads into initial and follow-up sections
-  // Leads move to follow-up as soon as any email is sent
-  const initialLeads = filteredLeads.filter(lead => !hasBeenEmailed(lead))
-  const followUpLeads = filteredLeads.filter(lead => hasBeenEmailed(lead))
+  // Leads move to follow-up as soon as any email is sent OR meeting is scheduled
+  const initialLeads = filteredLeads.filter(lead => !hasBeenContacted(lead))
+  const followUpLeads = filteredLeads.filter(lead => hasBeenContacted(lead))
   
   // Get active section leads
   const currentSectionLeads = activeSection === 'initial' ? initialLeads : followUpLeads
@@ -388,7 +411,7 @@ function Dashboard() {
         <div className="mb-8">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r text-black bg-clip-text">
                 Lead Dashboard
               </h1>
               <p className="text-sm text-slate-600 mt-2">
@@ -425,25 +448,128 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Total Leads</p>
-              <p className="text-3xl font-bold text-slate-900">{stats.total || 0}</p>
-            </div>
-            <div className="bg-linear-to-br from-red-50 to-red-100 p-5 rounded-xl shadow-sm border border-red-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-red-700 uppercase tracking-wide mb-1">🔥 Hot</p>
-              <p className="text-3xl font-bold text-red-600">{stats.hot || 0}</p>
-            </div>
-            <div className="bg-linear-to-br from-yellow-50 to-amber-100 p-5 rounded-xl shadow-sm border border-yellow-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-yellow-700 uppercase tracking-wide mb-1">🌡️ Warm</p>
-              <p className="text-3xl font-bold text-yellow-600">{stats.warm || 0}</p>
-            </div>
-            <div className="bg-linear-to-br from-blue-50 to-blue-100 p-5 rounded-xl shadow-sm border border-blue-200 hover:shadow-md transition-shadow">
-              <p className="text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">❄️ Cold</p>
-              <p className="text-3xl font-bold text-blue-600">{stats.cold || 0}</p>
-            </div>
+        {/* Charts Row — compact preview cards that open modals */}
+        {isAdmin && agents.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+            {/* Lead Tags Preview Card */}
+            {stats && (stats.hot > 0 || stats.warm > 0 || stats.cold > 0) && (
+              <button
+                onClick={() => setChartModal('tags')}
+                className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 text-left hover:shadow-md hover:border-purple-300 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <PieChartIcon className="h-5 w-5 text-purple-600" />
+                  <h2 className="text-base font-semibold text-slate-900">Lead Tags</h2>
+                  <span className="text-xs text-slate-500 ml-auto group-hover:text-purple-500 transition-colors">Click to expand</span>
+                </div>
+                {/* Mini donut preview */}
+                {(() => {
+                  const tagData = [
+                    { name: 'Hot', count: stats.hot, color: '#ef4444' },
+                    { name: 'Warm', count: stats.warm, color: '#f59e0b' },
+                    { name: 'Cold', count: stats.cold, color: '#3b82f6' },
+                  ].filter(t => t.count > 0)
+                  const totalTags = tagData.reduce((s, t) => s + t.count, 0)
+                  const TAG_CIRC = 2 * Math.PI * 40
+                  let tagCum = 0
+                  const tagSlices = tagData.map(t => {
+                    const pct = (t.count / totalTags) * 100
+                    const slice = { ...t, pct, offset: tagCum }
+                    tagCum += pct
+                    return slice
+                  })
+                  return (
+                    <div className="flex items-center gap-5">
+                      <div className="relative w-24 h-24 shrink-0">
+                        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                          {tagSlices.map((s, i) => (
+                            <circle key={i} cx="50" cy="50" r="40" fill="none" stroke={s.color} strokeWidth="16"
+                              strokeDasharray={`${(s.pct / 100) * TAG_CIRC} ${TAG_CIRC}`}
+                              strokeDashoffset={`${-(s.offset / 100) * TAG_CIRC}`}
+                            />
+                          ))}
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-lg font-bold text-slate-900">{totalTags}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {tagSlices.map((s, i) => (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
+                            <span className="text-xs font-medium text-slate-700">{s.name} {s.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
+              </button>
+            )}
+
+            {/* Agent Interactions Preview Card */}
+            <button
+              onClick={() => setChartModal('agents')}
+              className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 text-left hover:shadow-md hover:border-blue-300 transition-all group"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <PieChartIcon className="h-5 w-5 text-blue-600" />
+                <h2 className="text-base font-semibold text-slate-900">Agent Interactions</h2>
+                <span className="text-xs text-slate-500 ml-auto group-hover:text-blue-500 transition-colors">Click to expand</span>
+              </div>
+              {/* Mini donut preview */}
+              {(() => {
+                const agentData = agents.map((agent) => {
+                  const agentLeads = leads.filter(l => l.createdById === agent.id)
+                  const contacted = agentLeads.filter(l => {
+                    const hasEmail = Array.isArray(l.emailsSent) && l.emailsSent.length > 0
+                    const hasMeeting = Array.isArray(l.meetings) && l.meetings.length > 0
+                    return hasEmail || hasMeeting
+                  }).length
+                  return { name: agent.name || 'Unknown', total: agentLeads.length, contacted }
+                }).filter(a => a.total > 0)
+                const totalContacted = agentData.reduce((s, a) => s + a.contacted, 0)
+                const colors = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#10b981','#ec4899','#6366f1']
+                const CIRCUMFERENCE = 2 * Math.PI * 40
+                let cum = 0
+                const slices = agentData.map((a, i) => {
+                  const pct = totalContacted > 0 ? (a.contacted / totalContacted) * 100 : 0
+                  const s = { ...a, pct, color: colors[i % colors.length], offset: cum }
+                  cum += pct
+                  return s
+                })
+                if (totalContacted === 0) {
+                  return <p className="text-sm text-slate-400 py-4">No interactions yet</p>
+                }
+                return (
+                  <div className="flex items-center gap-5">
+                    <div className="relative w-24 h-24 shrink-0">
+                      <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                        {slices.map((s, i) => (
+                          <circle key={i} cx="50" cy="50" r="40" fill="none" stroke={s.color} strokeWidth="16"
+                            strokeDasharray={`${(s.pct / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                            strokeDashoffset={`${-(s.offset / 100) * CIRCUMFERENCE}`}
+                          />
+                        ))}
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-lg font-bold text-slate-900">{totalContacted}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {slices.map((s, i) => (
+                        <div key={i} className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
+                          <span className="text-xs font-medium text-slate-700">{s.name} {s.contacted}/{s.total}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
+            </button>
+
           </div>
         )}
 
@@ -548,6 +674,28 @@ function Dashboard() {
                               <span className="text-xs text-blue-600 font-medium">
                                 {lead.emailsSent.length} email{lead.emailsSent.length > 1 ? 's' : ''} sent
                               </span>
+                            </div>
+                          )}
+                          {lead.scheduledEmails && lead.scheduledEmails.length > 0 && (
+                            <div className="mt-1.5 space-y-1">
+                              {lead.scheduledEmails.map((se, idx) => (
+                                <div key={idx} className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-md">
+                                  <CalendarClock className="h-3 w-3 text-amber-600 shrink-0" />
+                                  <span className="text-[11px] text-amber-800 font-medium">
+                                    {se.emailType === 'initial' ? 'Initial' : 'Follow-up'} scheduled
+                                  </span>
+                                  <span className="text-[11px] text-amber-600">
+                                    {new Date(se.scheduledAt).toLocaleDateString(undefined, {
+                                      month: 'short',
+                                      day: 'numeric',
+                                    })}{' '}
+                                    {new Date(se.scheduledAt).toLocaleTimeString(undefined, {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -655,6 +803,13 @@ function Dashboard() {
                             Email
                           </button>
                           <button
+                            onClick={() => openScheduleModal(lead)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 transition-all hover:shadow-md"
+                          >
+                            <CalendarClock className="h-3.5 w-3.5" />
+                            Schedule
+                          </button>
+                          <button
                             onClick={() => openMeetModal(lead)}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-all hover:shadow-md"
                           >
@@ -696,6 +851,17 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Chart Modal */}
+      {chartModal && (
+        <ChartModal
+          type={chartModal}
+          stats={stats}
+          agents={agents}
+          leads={leads}
+          onClose={() => setChartModal(null)}
+        />
+      )}
+
       {/* Info Modal */}
       {infoModal?.show && (
         <InfoModal
@@ -723,6 +889,215 @@ function Dashboard() {
           onSuccess={handleMeetSuccess}
         />
       )}
+
+      {/* Schedule Email Modal */}
+      {showScheduleModal && selectedLead && (
+        <ScheduleEmailModal
+          lead={selectedLead}
+          onClose={closeScheduleModal}
+          onSuccess={handleScheduleSuccess}
+        />
+      )}
+    </div>
+  )
+}
+
+// Chart Modal Component
+function ChartModal({
+  type,
+  stats,
+  agents,
+  leads,
+  onClose,
+}: {
+  type: 'tags' | 'agents'
+  stats: Stats | null
+  agents: Agent[]
+  leads: Lead[]
+  onClose: () => void
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className={`flex items-center justify-between p-5 border-b border-slate-200 ${
+          type === 'tags'
+            ? 'bg-linear-to-r from-purple-50 to-pink-50'
+            : 'bg-linear-to-r from-blue-50 to-cyan-50'
+        }`}>
+          <div className="flex items-center gap-2">
+            <PieChartIcon className={`h-5 w-5 ${type === 'tags' ? 'text-purple-600' : 'text-blue-600'}`} />
+            <h3 className="font-semibold text-slate-900 text-lg">
+              {type === 'tags' ? 'Lead Tags Distribution' : 'Agent Interactions'}
+            </h3>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-white/50 rounded-lg transition-colors">
+            <X className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(85vh-140px)]">
+          {type === 'tags' && stats && (() => {
+            const tagData = [
+              { name: 'Hot', count: stats.hot, color: '#ef4444', emoji: '🔥' },
+              { name: 'Warm', count: stats.warm, color: '#f59e0b', emoji: '🌡️' },
+              { name: 'Cold', count: stats.cold, color: '#3b82f6', emoji: '❄️' },
+            ].filter(t => t.count > 0)
+
+            const totalTags = tagData.reduce((s, t) => s + t.count, 0)
+            if (totalTags === 0) {
+              return <p className="text-sm text-slate-400 text-center py-8">No leads yet</p>
+            }
+
+            const TAG_CIRC = 2 * Math.PI * 40
+            let tagCum = 0
+            const tagSlices = tagData.map(t => {
+              const pct = (t.count / totalTags) * 100
+              const slice = { ...t, pct, offset: tagCum }
+              tagCum += pct
+              return slice
+            })
+
+            return (
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                {/* Large Donut */}
+                <div className="relative w-52 h-52 shrink-0">
+                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                    {tagSlices.map((s, i) => (
+                      <circle
+                        key={i}
+                        cx="50" cy="50" r="40"
+                        fill="none"
+                        stroke={s.color}
+                        strokeWidth="16"
+                        strokeDasharray={`${(s.pct / 100) * TAG_CIRC} ${TAG_CIRC}`}
+                        strokeDashoffset={`${-(s.offset / 100) * TAG_CIRC}`}
+                        className="transition-all duration-500"
+                      />
+                    ))}
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold text-slate-900">{totalTags}</span>
+                    <span className="text-xs text-slate-500 font-medium">Total Leads</span>
+                  </div>
+                </div>
+
+                {/* Legend with bars */}
+                <div className="flex-1 w-full space-y-4">
+                  {tagSlices.map((s, i) => (
+                    <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ background: s.color }} />
+                          <span className="text-sm font-semibold text-slate-800">{s.emoji} {s.name}</span>
+                        </div>
+                        <span className="text-sm text-slate-700 font-bold">
+                          {s.count} <span className="text-xs font-normal text-slate-500">({Math.round(s.pct)}%)</span>
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700"
+                          style={{ width: `${s.pct}%`, background: s.color }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+
+          {type === 'agents' && (() => {
+            const agentData = agents.map((agent) => {
+              const agentLeads = leads.filter(l => l.createdById === agent.id)
+              const contacted = agentLeads.filter(l => {
+                const hasEmail = Array.isArray(l.emailsSent) && l.emailsSent.length > 0
+                const hasMeeting = Array.isArray(l.meetings) && l.meetings.length > 0
+                return hasEmail || hasMeeting
+              }).length
+              return { name: agent.name || 'Unknown', total: agentLeads.length, contacted }
+            }).filter(a => a.total > 0)
+
+            const totalContacted = agentData.reduce((s, a) => s + a.contacted, 0)
+            const colors = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#10b981','#ec4899','#6366f1']
+
+            let cumulative = 0
+            const slices = agentData.map((a, i) => {
+              const pct = totalContacted > 0 ? (a.contacted / totalContacted) * 100 : 0
+              const slice = { ...a, pct, color: colors[i % colors.length], offset: cumulative }
+              cumulative += pct
+              return slice
+            })
+
+            if (totalContacted === 0) {
+              return <p className="text-sm text-slate-400 text-center py-8">No interactions recorded yet</p>
+            }
+
+            const CIRCUMFERENCE = 2 * Math.PI * 40
+
+            return (
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                {/* Large Donut */}
+                <div className="relative w-52 h-52 shrink-0">
+                  <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                    {slices.map((s, i) => (
+                      <circle
+                        key={i}
+                        cx="50" cy="50" r="40"
+                        fill="none"
+                        stroke={s.color}
+                        strokeWidth="16"
+                        strokeDasharray={`${(s.pct / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                        strokeDashoffset={`${-(s.offset / 100) * CIRCUMFERENCE}`}
+                        className="transition-all duration-500"
+                      />
+                    ))}
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold text-slate-900">{totalContacted}</span>
+                    <span className="text-xs text-slate-500 font-medium">Contacted</span>
+                  </div>
+                </div>
+
+                {/* Legend with bars */}
+                <div className="flex-1 w-full space-y-4">
+                  {slices.map((s, i) => (
+                    <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ background: s.color }} />
+                          <span className="text-sm font-semibold text-slate-800">{s.name}</span>
+                        </div>
+                        <span className="text-sm text-slate-700 font-bold">
+                          {s.contacted} / {s.total}
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700"
+                          style={{ width: `${s.total > 0 ? (s.contacted / s.total) * 100 : 0}%`, background: s.color }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-200 bg-slate-50">
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2.5 bg-slate-900 text-white text-sm rounded-lg hover:bg-slate-800 transition-colors font-medium"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1098,6 +1473,252 @@ function MeetModal({
             ) : (
               <>
                 📅 Schedule
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Schedule Email Modal Component
+function ScheduleEmailModal({
+  lead,
+  onClose,
+  onSuccess,
+}: {
+  lead: Lead
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [emailType, setEmailType] = useState<'initial' | 'followup'>('followup')
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [scheduled, setScheduled] = useState(false)
+
+  if (!lead) return null
+
+  // Minimum date is now + 5 minutes
+  const minDateTime = (() => {
+    const d = new Date(Date.now() + 5 * 60 * 1000)
+    return d.toISOString().slice(0, 16)
+  })()
+
+  const handleSchedule = async () => {
+    if (!scheduleDate) {
+      alert('Please select a date and time')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/schedule-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: emailType,
+          scheduledAt: new Date(scheduleDate).toISOString(),
+        }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setScheduled(true)
+      } else {
+        alert(json.message || 'Failed to schedule email')
+      }
+    } catch (error) {
+      console.error(error)
+      alert('Failed to schedule email')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const leadTags = lead.tags || 'warm'
+
+  // Success state
+  if (scheduled) {
+    return (
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onSuccess}>
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+          <div className="p-5 border-b border-green-200 bg-linear-to-r from-green-50 to-emerald-50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-green-900">Email Scheduled!</h2>
+                <p className="text-sm text-green-700">For {lead.name || 'Lead'}</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-5 space-y-3">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <CalendarClock className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-semibold text-amber-800">Scheduled For</span>
+              </div>
+              <p className="text-sm text-slate-700">
+                {new Date(scheduleDate).toLocaleString(undefined, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-xs text-slate-600">
+                Type: <span className="font-semibold text-slate-900">{emailType === 'initial' ? '👋 Initial' : '🔄 Follow-up'}</span>
+                {' · '}
+                Priority: <span className="font-semibold text-slate-900">{leadTags.toUpperCase()}</span>
+              </p>
+            </div>
+          </div>
+          <div className="p-5 border-t border-slate-200 bg-slate-50">
+            <button
+              type="button"
+              onClick={onSuccess}
+              className="w-full px-4 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="p-5 border-b border-slate-200 bg-linear-to-r from-amber-50 to-orange-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center">
+              <CalendarClock className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Schedule Email</h2>
+              <p className="text-sm text-slate-600">For {lead.name || 'Lead'} · {lead.email}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-5 space-y-5">
+          {/* Email Type */}
+          <div>
+            <p className="text-sm font-medium text-slate-700 mb-3">Email Type</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setEmailType('initial')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  emailType === 'initial'
+                    ? 'border-amber-500 bg-amber-50 shadow-sm'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <span className="block text-2xl mb-1">👋</span>
+                <span className="text-sm font-medium text-slate-700">Initial</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEmailType('followup')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  emailType === 'followup'
+                    ? 'border-amber-500 bg-amber-50 shadow-sm'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <span className="block text-2xl mb-1">🔄</span>
+                <span className="text-sm font-medium text-slate-700">Follow Up</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Date & Time */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-1.5">
+              <Clock className="h-4 w-4 text-slate-500" />
+              Schedule Date & Time
+            </label>
+            <input
+              type="datetime-local"
+              value={scheduleDate}
+              min={minDateTime}
+              onChange={(e) => setScheduleDate(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none"
+            />
+          </div>
+
+          {/* Quick Schedule Buttons */}
+          <div>
+            <p className="text-xs font-medium text-slate-500 mb-2">Quick schedule</p>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: '1h', hours: 1 },
+                { label: '4h', hours: 4 },
+                { label: '1d', hours: 24 },
+                { label: '3d', hours: 72 },
+              ].map((opt) => {
+                const d = new Date(Date.now() + opt.hours * 60 * 60 * 1000)
+                const val = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+                return (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => setScheduleDate(val)}
+                    className={`py-2 rounded-lg font-medium text-sm transition-all ${
+                      scheduleDate === val
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-xs text-amber-700 flex items-center gap-1.5">
+              <CalendarClock className="h-3.5 w-3.5" />
+              Email will be sent automatically at the scheduled time
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              Template priority: <span className="font-semibold text-slate-700">{leadTags.toUpperCase()}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-5 border-t border-slate-200 bg-slate-50 flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSchedule}
+            disabled={loading || !scheduleDate}
+            className="flex-1 px-4 py-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              'Scheduling...'
+            ) : (
+              <>
+                <CalendarClock className="h-4 w-4" />
+                Schedule
               </>
             )}
           </button>

@@ -16,6 +16,7 @@ export function getDB() {
         if (!db.objectStoreNames.contains("leads")) {
           db.createObjectStore("leads", { keyPath: "id" });
         }
+        console.log("DB Upgrade - oldVersion:", oldVersion);
         // v2: contacts store (Stall + Field form submissions)
         if (!db.objectStoreNames.contains("contacts")) {
           const contactStore = db.createObjectStore("contacts", { keyPath: "id" });

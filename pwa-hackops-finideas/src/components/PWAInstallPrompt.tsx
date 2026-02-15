@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Type for the install prompt event (Chromium-only)
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<{ outcome: "accepted" | "dismissed" }>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -17,7 +16,6 @@ export default function PWAInstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Already running as installed PWA (standalone)
     const isStandalone =
       typeof window !== "undefined" &&
       (window.matchMedia("(display-mode: standalone)").matches ||
@@ -50,22 +48,21 @@ export default function PWAInstallPrompt() {
 
   const dismiss = () => {
     setShowBanner(false);
-    // Keep deferredPrompt so user can try again from a menu later if needed
   };
 
   if (isInstalled || !showBanner || !deferredPrompt) return null;
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-50 sm:bottom-4 sm:left-auto sm:right-4 sm:max-w-sm animate-in slide-in-from-bottom-4">
-      <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-900 text-white">
-          <span className="text-sm font-bold">F</span>
+      <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground">
+          <span className="text-background text-sm font-bold">F</span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-900">
-            Install Finideas Connect
+          <p className="text-sm font-semibold text-foreground">
+            Install Finideas
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Add to home screen for quick access
           </p>
         </div>
@@ -73,7 +70,7 @@ export default function PWAInstallPrompt() {
           <Button
             size="sm"
             onClick={handleInstall}
-            className="gap-1.5 rounded-md bg-slate-900 hover:bg-slate-800"
+            className="gap-1.5 rounded-xl bg-foreground text-background hover:bg-foreground/90"
           >
             <Download className="h-3.5 w-3.5" />
             Install
@@ -81,7 +78,7 @@ export default function PWAInstallPrompt() {
           <button
             type="button"
             onClick={dismiss}
-            className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />

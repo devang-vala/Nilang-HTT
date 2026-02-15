@@ -44,7 +44,7 @@ export default buildConfig({
   plugins: [],
   email: nodemailerAdapter({
     defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'valadevang071@gmail.com',
-    defaultFromName: 'HackOps',
+    defaultFromName: 'Finideas',
     transportOptions: {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: Number(process.env.SMTP_PORT) || 465,

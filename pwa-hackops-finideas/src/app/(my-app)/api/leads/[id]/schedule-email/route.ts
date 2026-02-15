@@ -34,6 +34,7 @@ export async function POST(
     const lead = await payload.findByID({
       collection: 'leads',
       id,
+      overrideAccess: true,
     })
 
     if (!lead) {
@@ -43,9 +44,8 @@ export async function POST(
       )
     }
 
+    // Try to find a CMS template (optional)
     let finalTemplateId = templateId
-
-    // If no templateId, get default template based on lead priority
     if (!finalTemplateId) {
       const template = await getDefaultTemplate(lead.tags as 'hot' | 'warm' | 'cold', type || 'followup')
       if (template) {
@@ -53,22 +53,23 @@ export async function POST(
       }
     }
 
-    if (!finalTemplateId) {
-      return NextResponse.json(
-        { success: false, message: 'No template found for this priority' },
-        { status: 400 }
-      )
+    const emailType = type || 'followup'
+
+    // Create scheduled email — template is optional, emailType is stored as fallback
+    const scheduledData: Record<string, unknown> = {
+      lead: id,
+      emailType,
+      scheduledAt: new Date(scheduledAt).toISOString(),
+      status: 'pending',
+    }
+    if (finalTemplateId) {
+      scheduledData.template = finalTemplateId
     }
 
-    // Create scheduled email
     const scheduled = await payload.create({
       collection: 'scheduled-emails',
-      data: {
-        lead: id,
-        template: finalTemplateId,
-        scheduledAt: new Date(scheduledAt).toISOString(),
-        status: 'pending',
-      },
+      data: scheduledData as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      overrideAccess: true,
     })
 
     // Update lead's next follow-up date
@@ -77,7 +78,8 @@ export async function POST(
       id,
       data: {
         nextFollowUpDate: new Date(scheduledAt).toISOString(),
-      },
+      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      overrideAccess: true,
     })
 
     return NextResponse.json({
@@ -85,9 +87,10 @@ export async function POST(
       message: 'Email scheduled successfully',
       data: scheduled,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error scheduling email'
     return NextResponse.json(
-      { success: false, message: 'Error scheduling email', error: error.message },
+      { success: false, message: 'Error scheduling email', error: message },
       { status: 500 }
     )
   }

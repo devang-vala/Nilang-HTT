@@ -53,7 +53,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased bg-slate-50 text-slate-900`}
+        className={`${inter.variable} font-sans antialiased text-foreground app-gradient`}
       >
         <QueryProvider>
           <OCRInitializer />

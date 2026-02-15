@@ -30,7 +30,16 @@ export const ScheduledEmails: CollectionConfig = {
       name: 'template',
       type: 'relationship',
       relationTo: 'email-templates',
-      required: true,
+      required: false,
+    },
+    {
+      name: 'emailType',
+      type: 'select',
+      options: [
+        { label: 'Initial', value: 'initial' },
+        { label: 'Follow Up', value: 'followup' },
+      ],
+      defaultValue: 'followup',
     },
     {
       name: 'scheduledAt',

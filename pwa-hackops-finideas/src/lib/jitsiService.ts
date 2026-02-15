@@ -29,11 +29,13 @@ function generateRoomName(leadName: string, leadId: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '')
     .substring(0, 15)
+    console.log("Generated room name for leadId:", leadId);
+    
   
   const timestamp = Date.now().toString(36)
   const randomStr = Math.random().toString(36).substring(2, 6)
   
-  return `HackOps${sanitizedName}${timestamp}${randomStr}`
+  return `Finideas${sanitizedName}${timestamp}${randomStr}`
 }
 
 // Generate Jitsi Meet links with proper config
@@ -76,7 +78,7 @@ async function sendInstantMeetingEmail(
   try {
     const payload = await getPayload({ config: configPromise })
 
-    const subject = `🎥 Join our meeting now - HackOps`
+    const subject = `🎥 Join our meeting now - Finideas`
     const body = `
 Dear ${leadName},
 
@@ -94,7 +96,7 @@ You're invited to join a meeting with us right now!
 We're waiting for you in the meeting room.
 
 Best regards,
-HackOps Team
+Finideas Team
     `.trim()
 
     const html = generateEmailHTML(body, leadEmail)
@@ -138,16 +140,25 @@ export async function createInstantMeeting(
     const roomName = generateRoomName(leadName, leadId)
     const { baseLink, hostLink, guestLink } = generateJitsiLinks(
       roomName,
-      'HackOps Team',
+      'Finideas Team',
       leadName
     )
 
     // Update lead with meeting info
-    const existingMeetings = (lead.meetings as Array<{
-      meetLink: string
-      scheduledAt: string
-      status: string
-    }>) || []
+    type MeetingItem = {
+      meetLink?: string | null
+      scheduledAt?: string | null
+      status?: 'scheduled' | 'completed' | 'cancelled' | null
+      id?: string | null
+    }
+    const existingMeetings: MeetingItem[] = Array.isArray(lead.meetings)
+      ? lead.meetings.map((m) => ({
+          meetLink: (m as MeetingItem).meetLink ?? null,
+          scheduledAt: (m as MeetingItem).scheduledAt ?? null,
+          status: ((m as MeetingItem).status as 'scheduled' | 'completed' | 'cancelled') ?? null,
+          id: (m as MeetingItem).id ?? null,
+        }))
+      : []
 
     existingMeetings.push({
       meetLink: guestLink,
@@ -224,7 +235,7 @@ export async function createScheduledMeeting({
     const roomName = generateRoomName(leadName, leadId)
     const { baseLink, hostLink, guestLink } = generateJitsiLinks(
       roomName,
-      'HackOps Team',
+      'Finideas Team',
       leadName
     )
 
@@ -241,13 +252,22 @@ export async function createScheduledMeeting({
     })
 
     // Update lead with meeting info
-    const existingMeetings = (lead.meetings as Array<{
-      meetLink: string
-      scheduledAt: string
-      status: string
-    }>) || []
+    type MeetingEntry = {
+      meetLink?: string | null
+      scheduledAt?: string | null
+      status?: 'scheduled' | 'completed' | 'cancelled' | null
+      id?: string | null
+    }
+    const existingMeetingsScheduled: MeetingEntry[] = Array.isArray(lead.meetings)
+      ? lead.meetings.map((m) => ({
+          meetLink: (m as MeetingEntry).meetLink ?? null,
+          scheduledAt: (m as MeetingEntry).scheduledAt ?? null,
+          status: ((m as MeetingEntry).status as 'scheduled' | 'completed' | 'cancelled') ?? null,
+          id: (m as MeetingEntry).id ?? null,
+        }))
+      : []
 
-    existingMeetings.push({
+    existingMeetingsScheduled.push({
       meetLink: guestLink,
       scheduledAt: meetingDate.toISOString(),
       status: 'scheduled',
@@ -257,7 +277,7 @@ export async function createScheduledMeeting({
       collection: 'leads',
       id: leadId,
       data: {
-        meetings: existingMeetings,
+        meetings: existingMeetingsScheduled,
         followUpStatus: 'meeting_scheduled',
         nextFollowUpDate: meetingDate.toISOString(),
       },
@@ -334,7 +354,7 @@ Your meeting has been scheduled! Here are the details:
 We're looking forward to speaking with you about ${companyName}'s needs!
 
 Best regards,
-HackOps Team
+Finideas Team
     `.trim()
 
     const html = generateEmailHTML(body, leadEmail)

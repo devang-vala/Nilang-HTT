@@ -33,6 +33,26 @@ export async function GET() {
       depth: 1,
     })
 
+    // Get all pending scheduled emails
+    const scheduledEmails = await payload.find({
+      collection: 'scheduled-emails',
+      where: { status: { equals: 'pending' } },
+      limit: 1000,
+      overrideAccess: true,
+    })
+
+    // Build lookup: leadId → pending scheduled emails
+    const scheduledByLead = new Map<string, Array<{ scheduledAt: string; emailType: string }>>()
+    for (const se of scheduledEmails.docs) {
+      const leadId = typeof se.lead === 'string' ? se.lead : (se.lead as { id: string }).id
+      if (!leadId) continue
+      if (!scheduledByLead.has(leadId)) scheduledByLead.set(leadId, [])
+      scheduledByLead.get(leadId)!.push({
+        scheduledAt: se.scheduledAt,
+        emailType: se.emailType ?? 'followup',
+      })
+    }
+
     // Sort by priority (hot > warm > cold)
     const priorityOrder: Record<string, number> = { hot: 1, warm: 2, cold: 3 }
     const sortedLeads = leads.docs.sort((a, b) => {
@@ -108,6 +128,7 @@ export async function GET() {
         createdAt: lead.createdAt,
         createdById: createdBy.id,
         createdByName: createdBy.name,
+        scheduledEmails: scheduledByLead.get(lead.id as string) || [],
       }
     })
 

@@ -30,14 +30,14 @@ const hotTemplates: Record<EmailType, EmailTemplate> = {
 
 It was wonderful meeting you at the conference! I could sense your keen interest in our solutions.
 
-At HackOps, we specialize in helping professionals like you achieve exceptional results.
+At Finideas, we specialize in helping professionals like you achieve exceptional results.
 
 I'd love to schedule a priority call with you this week. Would tomorrow or the day after work for a quick 15-minute call?
 
 Looking forward to connecting soon!
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
   followup: {
     subject: '⚡ Quick follow-up, {{name}}!',
@@ -50,7 +50,7 @@ I've been thinking about {{companyName}}'s needs, and I believe we have some exc
 Just reply with your preferred time, and I'll send over a calendar invite.
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
   meeting: {
     subject: '📅 Your Meeting is Confirmed - {{name}}',
@@ -69,7 +69,7 @@ How to Join:
 Looking forward to our conversation!
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
 }
 
@@ -81,15 +81,15 @@ const warmTemplates: Record<EmailType, EmailTemplate> = {
 
 Thank you for stopping by our booth at the conference! It was great to meet you.
 
-I wanted to share a bit more about how HackOps can help {{companyName}} achieve your goals.
+I wanted to share a bit more about how Finideas can help {{companyName}} achieve your goals.
 
 Feel free to reply with a convenient time for a quick call.
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
   followup: {
-    subject: 'Following up - HackOps Solutions',
+    subject: 'Following up - Finideas Solutions',
     body: `Dear {{name}},
 
 I hope you're having a great week! I wanted to follow up on our brief meeting at the conference.
@@ -99,7 +99,7 @@ Would you be open to a quick 15-minute call to explore if we're a good fit?
 Looking forward to hearing from you!
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
   meeting: {
     subject: '📅 Your Meeting is Confirmed - {{name}}',
@@ -114,7 +114,7 @@ How to Join:
 Simply click the link above at the scheduled time. No account or download needed!
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
 }
 
@@ -126,12 +126,12 @@ const coldTemplates: Record<EmailType, EmailTemplate> = {
 
 Thank you for visiting our booth at the recent conference.
 
-At HackOps, we help businesses like {{companyName}} with innovative solutions designed to drive growth.
+At Finideas, we help businesses like {{companyName}} with innovative solutions designed to drive growth.
 
 If you'd like to learn more, feel free to reply to this email.
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
   followup: {
     subject: 'Still thinking about it? We are here to help',
@@ -142,7 +142,7 @@ I wanted to check in and see if you've had any thoughts about exploring solution
 No rush at all - whenever you're ready to chat, I'm just an email away.
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
   meeting: {
     subject: '📅 Your Meeting Details - {{name}}',
@@ -156,7 +156,7 @@ Your meeting has been scheduled.
 This will be a casual, no-pressure conversation. Feel free to reach out if you have any questions.
 
 Best regards,
-HackOps Team`,
+Finideas Team`,
   },
 }
 
@@ -172,6 +172,22 @@ export function getTemplate(priority: Priority, type: EmailType): EmailTemplate 
   return templates[priority][type]
 }
 
+export type TemplateInfo = { priority: Priority; type: EmailType; subject: string; body: string }
+
+// Get all templates as a flat list (for API listing)
+export function getAllTemplates(): TemplateInfo[] {
+  const result: TemplateInfo[] = []
+  const priorities: Priority[] = ['hot', 'warm', 'cold']
+  const types: EmailType[] = ['initial', 'followup', 'meeting']
+  for (const p of priorities) {
+    for (const t of types) {
+      const tmpl = templates[p][t]
+      result.push({ priority: p, type: t, subject: tmpl.subject, body: tmpl.body })
+    }
+  }
+  return result
+}
+
 // Get parsed template with data
 export function getParsedTemplate(
   priority: Priority,
@@ -185,7 +201,7 @@ export function getParsedTemplate(
   }
 }
 
-// Generate HTML email
+// Generate HTML email – Finideas layout (header, body, footer – no social links)
 export function generateEmailHTML(body: string, recipientEmail: string): string {
   return `
 <!DOCTYPE html>
@@ -193,38 +209,69 @@ export function generateEmailHTML(body: string, recipientEmail: string): string 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finideas Official Mail</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden;">
-          <tr>
-            <td style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); padding: 32px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px;">🚀 HackOps</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 32px;">
-              <div style="color: #374151; font-size: 15px; line-height: 1.7;">
-                ${body.replace(/\n/g, '<br>')}
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="margin: 0; color: #6b7280; font-size: 13px;">
-                HackOps - Lead Management System
-              </p>
-              <p style="margin: 8px 0 0 0; color: #9ca3af; font-size: 12px;">
-                Sent to ${recipientEmail}
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+<body style="margin:0; padding:0; background-color:#ffffff;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff; font-family:Verdana, sans-serif;">
+
+  <!-- HEADER -->
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#000000;">
+        <tr>
+          <td style="padding:16px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="middle" style="color:#ffffff;">
+                  <div style="font-size:20px; font-weight:bold;">
+                    FINIDEAS
+                  </div>
+                  <div style="font-size:12px; color:#cccccc; letter-spacing:0.4px;">
+                    INVESTMENT ADVISORY & CONFERENCE LEAD MANAGEMENT
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr>
+          <td style="padding:24px; font-size:14px; line-height:1.7; text-align:left; color:#222222;">
+            ${body.replace(/\n/g, '<br>')}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#000000;">
+        <tr>
+          <td style="padding:16px; text-align:center;">
+            <div style="margin-top:8px; font-size:11px; color:#999999;">
+              © Finideas. All rights reserved.
+            </div>
+            <div style="margin-top:4px; font-size:11px; color:#999999;">
+              Sent to ${recipientEmail}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+
 </body>
 </html>
   `.trim()

@@ -44,93 +44,80 @@ export const Users: CollectionConfig = {
 
     forgotPassword: {
       generateEmailSubject: () => {
-        return 'Reset Your Password - HackOps'
+        return 'Reset Your Password - Finideas'
       },
 
       generateEmailHTML: ({ token, user } = {}) => {
         const resetPasswordURL = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${token}`
 
         return `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-              <style>
-                body {
-                  font-family: Arial, sans-serif;
-                  line-height: 1.6;
-                  color: #333;
-                  margin: 0;
-                  padding: 0;
-                }
-                .container {
-                  max-width: 600px;
-                  margin: 0 auto;
-                  padding: 20px;
-                }
-                .header {
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  color: white;
-                  padding: 30px;
-                  text-align: center;
-                  border-radius: 10px 10px 0 0;
-                }
-                .header h1 {
-                  margin: 0;
-                  font-size: 24px;
-                }
-                .content {
-                  background: #f9f9f9;
-                  padding: 30px;
-                  border-radius: 0 0 10px 10px;
-                }
-                .button {
-                  display: inline-block;
-                  padding: 12px 30px;
-                  background: #667eea;
-                  color: white;
-                  text-decoration: none;
-                  border-radius: 5px;
-                  margin: 20px 0;
-                  font-weight: bold;
-                }
-                .footer {
-                  text-align: center;
-                  margin-top: 20px;
-                  color: #666;
-                  font-size: 12px;
-                }
-                .link {
-                  word-break: break-all;
-                  color: #667eea;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <h1>Reset Your Password</h1>
-                </div>
-                <div class="content">
-                  <p>Hi${user?.email ? ` ${user.email}` : ' there'},</p>
-                  <p>You requested to reset your password for your HackOps account.</p>
-                  <p>Click the button below to reset your password:</p>
-                  <p>
-                    <a href="${resetPasswordURL}" class="button">Reset Password</a>
-                  </p>
-                  <p>Or copy and paste this link into your browser:</p>
-                  <p class="link">${resetPasswordURL}</p>
-                  <p><strong>This link will expire in 1 hour.</strong></p>
-                  <p>If you didn't request a password reset, please ignore this email.</p>
-                </div>
-                <div class="footer">
-                  <p>&copy; 2026 HackOps. All rights reserved.</p>
-                </div>
-              </div>
-            </body>
-          </html>
-        `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Finideas Official Mail</title>
+</head>
+<body style="margin:0; padding:0; background-color:#ffffff;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff; font-family:Verdana, sans-serif;">
+
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#000000;">
+        <tr>
+          <td style="padding:16px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="middle" style="color:#ffffff;">
+                  <div style="font-size:20px; font-weight:bold;">FINIDEAS</div>
+                  <div style="font-size:12px; color:#cccccc; letter-spacing:0.4px;">INVESTMENT ADVISORY & CONFERENCE LEAD MANAGEMENT</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr>
+          <td style="padding:24px; font-size:14px; line-height:1.7; text-align:left; color:#222222;">
+            <p>Hi${user?.email ? ` ${user.email}` : ' there'},</p>
+            <p>You requested to reset your password for your Finideas account.</p>
+            <p>Click the button below to reset your password:</p>
+            <p style="margin:20px 0;">
+              <a href="${resetPasswordURL}" style="display:inline-block; padding:12px 30px; background-color:#000000; color:#ffffff; text-decoration:none; font-weight:bold;">Reset Password</a>
+            </p>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break:break-all; color:#2563eb;">${resetPasswordURL}</p>
+            <p><strong>This link will expire in 1 hour.</strong></p>
+            <p>If you didn't request a password reset, please ignore this email.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background-color:#000000;">
+        <tr>
+          <td style="padding:16px; text-align:center;">
+            <div style="font-size:11px; color:#999999;">© Finideas. All rights reserved.</div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+
+</body>
+</html>
+        `.trim()
       },
     },
   },
