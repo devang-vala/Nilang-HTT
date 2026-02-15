@@ -63,6 +63,8 @@ const leadSchema = z.object({
     city: z.string().optional().nullable(),
     state: z.string().optional().nullable(),
     country: z.string().optional().nullable(),
+    /** Client sends first-locker user id so assignee is preserved on create (only accepted when self or admin) */
+    createdByUserId: z.string().optional().nullable(),
 })
 
 // GET - Fetch leads (filtered by role)
@@ -213,7 +215,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (existing.docs.length > 0) {
-            // Update: merge stall + field (keep existing when new is empty so both modes contribute)
+            // Update: merge data only; do NOT set createdBy so the first user who locked this client stays assigned
             const merged = {
                 name: (data.name?.trim() || existingLead.name) as string,
                 companyName: (data.companyName?.trim() || existingLead.companyName) ?? null,
@@ -264,10 +266,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, message: 'Lead updated successfully', data: formattedLead }, { status: 201 })
         }
 
+        // Use client's first-locker id only when self or admin (so merged data does not replace assignee)
+        const createdBy =
+            data.createdByUserId &&
+            (data.createdByUserId === currentUser.id || currentUser.role === 'admin')
+                ? data.createdByUserId
+                : currentUser.id
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omit from payload create
+        const { createdByUserId, ...dataForCreate } = data
         const createData = {
-                ...data,
+                ...dataForCreate,
                 followUpTags,
-                createdBy: currentUser.id,
+                createdBy,
         }
         const lead = await payload.create({
             collection: 'leads',

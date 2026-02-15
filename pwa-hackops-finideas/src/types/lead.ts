@@ -45,6 +45,8 @@ export interface ContactFormData {
   syncStatus: "pending" | "synced" | "error";
   syncError?: string;
   payloadId?: string; // ID from Payload CMS after sync
+  /** User who first locked/created this client (preserved on merge so assignee is not replaced) */
+  createdByUserId?: string | null;
   createdAt: number;
   updatedAt: number;
 }

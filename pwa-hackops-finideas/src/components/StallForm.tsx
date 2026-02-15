@@ -5,6 +5,7 @@ import { saveContactLocally, isOnline, syncContactToPayload } from "@/lib/contac
 import { initOCR, isOCRReady, runOCR } from "@/lib/ocr";
 import { parseOcrText } from "@/lib/parseOcrText";
 import { getCurrentLocation } from "@/lib/location/getCurrentLocation";
+import { useCurrentUser } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,6 +40,7 @@ export default function StallForm() {
   const [qrData, setQrData] = useState<string | null>(null);
   const scanInputRef = useRef<HTMLInputElement>(null);
   const submitInProgressRef = useRef(false);
+  const { data: currentUser } = useCurrentUser();
 
   const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,6 +103,7 @@ export default function StallForm() {
         latitude,
         longitude,
         qrData,
+        createdByUserId: currentUser?.id ?? undefined,
       });
 
       if (isOnline()) {

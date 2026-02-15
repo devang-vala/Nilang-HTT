@@ -136,17 +136,22 @@ export function useCurrentUser() {
   })
 }
 
-// Logout — uses Payload's built-in /api/users/logout
+// Logout — uses Payload's built-in /api/users/logout. Calls onComplete after cache is cleared (use for redirect to avoid blank page).
 export function useLogout() {
   const queryClient = useQueryClient()
 
-  return () => {
+  return (onComplete?: () => void) => {
     fetch('/api/users/logout', {
       method: 'POST',
       credentials: 'include',
     }).then(() => {
       queryClient.setQueryData(authKeys.user(), null)
       queryClient.clear()
+      onComplete?.()
+    }).catch(() => {
+      queryClient.setQueryData(authKeys.user(), null)
+      queryClient.clear()
+      onComplete?.()
     })
   }
 }

@@ -11,6 +11,7 @@ import { initOCR, isOCRReady, runOCR } from "@/lib/ocr";
 import { parseOcrText } from "@/lib/parseOcrText";
 import { getCurrentLocation } from "@/lib/location/getCurrentLocation";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { useCurrentUser } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -51,6 +52,7 @@ export default function FieldForm() {
   const submitInProgressRef = useRef(false);
 
   const audio = useAudioRecorder();
+  const { data: currentUser } = useCurrentUser();
 
   const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -124,6 +126,7 @@ export default function FieldForm() {
         latitude,
         longitude,
         qrData,
+        createdByUserId: currentUser?.id ?? undefined,
       });
 
       if (isOnline()) {

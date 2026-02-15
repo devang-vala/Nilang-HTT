@@ -58,6 +58,8 @@ export async function saveContactLocally(
     syncStatus: "pending",
     createdAt: now,
     updatedAt: now,
+    // First user who creates this contact is the "locker" (preserved on merge)
+    createdByUserId: data.createdByUserId ?? undefined,
   };
 
   const existingContacts: ContactFormData[] = await db.getAll("contacts");
@@ -87,6 +89,8 @@ export async function saveContactLocally(
       country: contact.country ?? duplicate.country,
       syncStatus: "pending",
       updatedAt: now,
+      // Keep the first user who locked this client (do not replace with recent user)
+      createdByUserId: duplicate.createdByUserId ?? contact.createdByUserId ?? undefined,
     };
     merged.contactNo = toCanonicalPhone(merged.contactNo) || merged.contactNo;
     await db.put("contacts", merged);
@@ -279,6 +283,8 @@ export async function syncContactToPayload(
       email: contact.email,
       tags: contact.tags,
     };
+    // Send first-locker so server can preserve assignee on create (merge only updates data, not assignee)
+    if (contact.createdByUserId) payload.createdByUserId = contact.createdByUserId;
 
     if (photoId) payload.photo = photoId;
     if (voiceNoteId) payload.voiceNote = voiceNoteId;
@@ -413,6 +419,8 @@ export async function deduplicateAllContacts(): Promise<{ merged: number }> {
       followUpTags: keep.followUpTags?.length ? keep.followUpTags : rest.find((r) => r.followUpTags?.length)?.followUpTags,
       syncStatus: keep.syncStatus === "synced" ? "synced" : "pending",
       updatedAt: Date.now(),
+      // Preserve first user who locked this client (oldest in group)
+      createdByUserId: keep.createdByUserId ?? rest.find((r) => r.createdByUserId)?.createdByUserId ?? undefined,
     };
     await db.put("contacts", mergedContact);
     for (const r of rest) await db.delete("contacts", r.id);

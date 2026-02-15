@@ -22,8 +22,7 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPasswordMutation.mutateAsync({ email })
       setSuccess(true)
-    } catch (err) {
-      console.error('Forgot password error:', err)
+    } catch {
       setSuccess(true)
     }
   }

@@ -280,7 +280,7 @@ function Dashboard() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!userLoading && !user) {
-      router.push('/auth')
+      router.replace('/auth')
     }
   }, [user, userLoading, router])
 
@@ -315,6 +315,18 @@ function Dashboard() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Avoid blank page: show redirecting state until navigation completes (after all hooks)
+  if (!userLoading && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-foreground border-t-transparent" />
+          <p className="text-sm text-muted-foreground font-medium">Redirecting to login...</p>
+        </div>
+      </div>
+    )
+  }
 
   const getTagColor = (tag: string | undefined | null) => {
     if (tag === "hot") return "bg-linear-to-r from-red-500 to-orange-500 text-white"

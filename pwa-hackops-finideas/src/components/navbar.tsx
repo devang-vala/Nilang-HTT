@@ -42,8 +42,10 @@ export default function Navbar() {
   }
 
   const handleLogout = () => {
-    logout()
-    window.location.href = '/auth'
+    // Redirect after logout completes so we never re-render with user=null (avoids blank PWA page)
+    logout(() => {
+      window.location.href = '/auth'
+    })
   }
 
   const closeSidebar = () => setMobileSidebarOpen(false)

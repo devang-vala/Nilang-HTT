@@ -1,6 +1,5 @@
 import { getPayload } from 'payload'
 import configPromise from '../payload.config'
-import { sendEmailToLead } from './emailService'
 import { generateEmailHTML } from './emailTemplates'
 
 interface MeetingResult {
@@ -30,7 +29,6 @@ function generateRoomName(leadName: string, leadId: string): string {
     .replace(/[^a-z0-9]/g, '')
     .substring(0, 15)
     console.log("Generated room name for leadId:", leadId);
-    
   
   const timestamp = Date.now().toString(36)
   const randomStr = Math.random().toString(36).substring(2, 6)
