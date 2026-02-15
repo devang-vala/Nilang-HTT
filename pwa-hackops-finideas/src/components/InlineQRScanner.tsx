@@ -73,16 +73,16 @@ export default function InlineQRScanner({
   // If we already have a value, show it with a clear button
   if (value) {
     return (
-      <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-md">
-        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-        <span className="text-xs text-emerald-800 truncate flex-1" title={value}>
-          {value.length > 60 ? value.slice(0, 57) + "…" : value}
+      <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-xl">
+        <CheckCircle2 className="h-4 w-4 text-foreground shrink-0" />
+        <span className="text-xs text-foreground truncate flex-1" title={value}>
+          {value.length > 60 ? value.slice(0, 57) + "..." : value}
         </span>
         {onClear && (
           <button
             type="button"
             onClick={onClear}
-            className="p-1 text-emerald-500 hover:text-red-500 transition-colors"
+            className="p-1 text-muted-foreground hover:text-destructive transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -97,7 +97,7 @@ export default function InlineQRScanner({
         type="button"
         variant="outline"
         size="sm"
-        className="rounded-md gap-1.5 w-full"
+        className="rounded-xl gap-1.5 w-full h-11 border-border text-foreground hover:bg-muted"
         onClick={() => fileInputRef.current?.click()}
         disabled={scanning}
       >
@@ -106,7 +106,7 @@ export default function InlineQRScanner({
         ) : (
           <QrCode className="h-4 w-4" />
         )}
-        {scanning ? "Scanning…" : "Upload QR from gallery"}
+        {scanning ? "Scanning..." : "Upload QR from gallery"}
       </Button>
 
       <input
@@ -117,9 +117,8 @@ export default function InlineQRScanner({
         onChange={handleFileSelect}
       />
 
-      {/* Error */}
       {error && (
-        <div className="flex items-start gap-1.5 text-xs text-red-600">
+        <div className="flex items-start gap-1.5 text-xs text-destructive">
           <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>

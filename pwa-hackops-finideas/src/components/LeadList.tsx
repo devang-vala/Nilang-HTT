@@ -67,26 +67,29 @@ export default function LeadList({ isActive = true }: LeadListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-900">
+        <span className="text-sm font-semibold text-foreground">
           Visiting cards ({leads.length})
         </span>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="rounded-md text-xs gap-1"
+          className="rounded-xl text-xs gap-1.5 border-border text-foreground hover:bg-muted"
           onClick={handleSync}
           disabled={syncing}
         >
           <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-          {syncing ? "Syncing…" : "Sync to server"}
+          {syncing ? "Syncing..." : "Sync to server"}
         </Button>
       </div>
 
       {leads.length === 0 && (
-        <div className="text-center py-8 text-slate-500 rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
-          <FileText className="h-10 w-10 mx-auto mb-2 opacity-40" />
-          <p className="text-sm">No cards yet. Use the upload area above to add a visiting card.</p>
+        <div className="text-center py-12 rounded-xl border border-dashed border-border bg-muted/30">
+          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <FileText className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground mb-1">No cards yet</p>
+          <p className="text-xs text-muted-foreground">Use the upload area above to add a visiting card.</p>
         </div>
       )}
 
@@ -119,7 +122,7 @@ function LeadCard({
   }, [lead.image]);
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg p-4 shadow-sm relative">
+    <div className="bg-card border border-border rounded-xl p-4 relative">
       <div className="flex gap-4">
         <div className="shrink-0">
           {objectUrl && (
@@ -127,36 +130,36 @@ function LeadCard({
             <img
               src={objectUrl}
               alt="Card"
-              className="w-24 h-24 object-cover rounded-md border border-slate-200"
+              className="w-24 h-24 object-cover rounded-xl border border-border"
             />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2">
             <span
-              className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                 lead.ocrStatus === "done"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : "bg-amber-50 text-amber-700 border-amber-200 animate-pulse"
+                  ? "bg-foreground text-background"
+                  : "bg-muted text-muted-foreground animate-pulse"
               }`}
             >
-              {lead.ocrStatus === "done" ? "✓ OCR done" : "⏳ Processing"}
+              {lead.ocrStatus === "done" ? "OCR done" : "Processing"}
             </span>
-            <span className="flex items-center gap-1 text-slate-500">
+            <span className="flex items-center gap-1 text-muted-foreground">
               {lead.syncStatus === "synced" ? (
-                <Cloud className="h-3.5 w-3.5 text-emerald-500" />
+                <Cloud className="h-3.5 w-3.5 text-foreground/50" />
               ) : (
-                <CloudOff className="h-3.5 w-3.5 text-slate-400" />
+                <CloudOff className="h-3.5 w-3.5 text-muted-foreground/40" />
               )}
               <span className="text-[10px]">
                 {lead.syncStatus === "synced" ? "Synced" : "Pending"}
               </span>
             </span>
           </div>
-          <div className="text-xs text-slate-600">
-            <p className="font-medium text-slate-500 mb-1">Extracted text</p>
-            <pre className="bg-slate-50 p-2 rounded-md border border-slate-100 text-xs overflow-auto max-h-24 whitespace-pre-wrap">
-              {lead.rawText || "Waiting for OCR…"}
+          <div className="text-xs text-muted-foreground">
+            <p className="font-medium text-muted-foreground mb-1">Extracted text</p>
+            <pre className="bg-muted p-2.5 rounded-xl border border-border text-xs overflow-auto max-h-24 whitespace-pre-wrap text-foreground">
+              {lead.rawText || "Waiting for OCR..."}
             </pre>
           </div>
         </div>
@@ -164,7 +167,7 @@ function LeadCard({
           type="button"
           onClick={() => onDelete(lead)}
           disabled={isDeleting}
-          className="absolute top-3 right-3 p-1.5 text-slate-300 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
+          className="absolute top-3 right-3 p-1.5 text-muted-foreground/40 hover:text-destructive rounded-lg transition-colors disabled:opacity-50"
           aria-label="Delete lead"
         >
           <Trash2 className="h-3.5 w-3.5" />
